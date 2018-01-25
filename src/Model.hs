@@ -30,10 +30,11 @@ data ExercisePart = Markdown {
 } | Input {
   inputType :: InputType
 } | Choice {
-  singleChoice :: Maybe Bool,  
+  single :: Maybe Bool,  
+  compact :: Maybe Bool,
   choices :: [Text]
 } | ChoiceTable {
-  singleChoice :: Maybe Bool,
+  single :: Maybe Bool,
   choices :: [Text],
   rows :: [Text]
 } deriving (Generic,Show)
@@ -70,8 +71,8 @@ instance FromJSON InputType where
   
 instance FromJSON ExercisePart where  
   parseJSON v =
-    fmap (Markdown) (parseJSON v) <|>    
-    (genericParseJSON options v)
+    fmap Markdown (parseJSON v) <|>    
+    genericParseJSON options v
   
 instance FromJSON Exercise where
   parseJSON = genericParseJSON options

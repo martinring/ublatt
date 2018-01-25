@@ -1,7 +1,12 @@
 document.addEventListener("DOMContentLoaded", function(e) {
   let inputs = document.getElementsByTagName("textarea");
   for (let i = 0; i < inputs.length; i++) {
-    let input = inputs.item(i)    
+    let input = inputs.item(i)
+    if (input.classList.contains("free")) {
+      let editor = CodeMirror.fromTextArea(input, {        
+        viewportMargin: Infinity
+      })
+    }
     if (input.classList.contains("math")) {      
       let row = document.createElement("div");
       row.classList.add("row")
