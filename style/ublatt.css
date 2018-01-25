@@ -1,0 +1,162 @@
+body {
+  background-color: #444;
+}
+form.ublatt {
+  background-color: #fff;
+  display: block;
+  margin: auto;
+  max-width: 55rem;
+  box-shadow: 0.1rem 0.1rem 1rem #000;  
+  padding: 2rem;
+  margin: 1em auto;
+  font-family: "Computer Modern Serif";
+  font-size: 1.2rem;
+  counter-reset: figure;
+  letter-spacing: -0.01em;
+}
+form.ublatt::before {
+  display: block;
+  height: 5rem;
+  content: '';
+  background-image: url("images/logo.png");
+  background-size: auto 2.5rem;
+  background-position: 2rem 1rem;
+  background-repeat: no-repeat;  
+  border-bottom: 0.1rem solid black;
+}
+form.ublatt .head {
+  margin: 1em 2rem;
+  display: grid;
+  grid-template-columns: 
+    [left] max-content
+    [middle] auto
+    [right] max-content;
+}
+form.ublatt .head .title {
+  grid-column: left;
+  grid-row: 1;  
+}
+form.ublatt .head .term {
+  margin: 0 1em;
+  grid-column: middle;
+  grid-row: 1;
+}
+form.ublatt .head .lecturers {
+  grid-column: right;
+  grid-row: 1/3;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+form.ublatt .head .lecturers li {  
+  margin: none;
+}
+form.ublatt .head .sheetnum {
+  grid-row: 2;
+  grid-column: 1/3;
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 1rem 0 0.5rem 0;
+}
+form.ublatt .head .sheetnum:after {
+  content: '. Übungsblatt'
+}
+form.ublatt .head .dates {
+  grid-row: 3;
+  grid-column: 1/3;    
+}
+form.ublatt .head .dates .issued::before {
+  content: "Ausgabe: ";
+  font-weight: bold;
+}
+form.ublatt .main {
+
+  margin: 1em 2rem;
+}
+form.ublatt .math.display {
+  display: block;
+  text-align: center;
+  margin: 16px;
+}
+/*form.ublatt h1,
+form.ublatt h2,
+form.ublatt h3,
+form.ublatt h4,
+form.ublatt h5,
+form.ublatt h6 {
+  font-family: "Computer Modern Sans";
+}*/
+form.ublatt textarea {    
+  padding: 8px;
+  width: calc(100% - 16px);
+}
+.rendered.math.error {
+  color: red;
+}
+.row .column:first-child {
+  padding-right: 8px;
+}
+.row .column:last-child {
+  padding-left: 8px;
+}
+.column {
+  float: left;
+  width: calc(50% - 8px);
+}
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}
+.rendered.math.placeholder::after {
+  color: #ccc;
+  content: "Bitte gebe die Lösung als LaTeX Formel im linken Textfeld an, sie wird dann hier angezeigt"
+}
+table {
+  margin: auto;
+  line-height: 0;
+  border-collapse: collapse;    
+}
+/*.figure::after {
+  margin-top: 0.5rem;
+  font-size: 0.8em;
+  display: block;  
+  text-align: center;
+  counter-increment: figure;
+  content: "Figure " counter(figure);
+}*/
+th {
+  padding: 0 1em;
+  border-bottom: 0.1rem solid black;
+}
+td {
+  padding: 0 1em;
+  text-align: center;
+  border-bottom: 0.1rem solid #ccc;
+}
+.choicetable_rh {
+  text-align: right;
+}
+.exercisenum {
+  display: inline-block;
+  border: 0.05em solid black;
+  padding: 0 0.1rem;
+  text-align: center;
+  font-weight: normal;  
+  margin-right: 0.5em;
+}
+.exercisenum .exercisenum_sheet::after {
+  content: "."
+}
+
+.image {  
+  text-align: center;
+}
+
+.image img {
+  max-width: 80%;
+}
