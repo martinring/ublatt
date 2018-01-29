@@ -94,19 +94,17 @@ makeExercisePart e i (Choice single compact choices) = do
         "choice" : 
         map (const "compact") (filter id (maybeToList compact))  
   H.ul ! A.class_ classNames $ forM_ (zip choices [1 ..]) $ \(choice, ci) ->
-    H.li $ H.label $ do
-      if isSingle
-      then
-        H.input 
-        ! A.type_ "radio" 
-        ! A.name (exerciseName e i Nothing) 
-        ! A.value (textValue choice)
-      else
-        H.input
-        ! A.type_ "checkbox"
-        ! A.name (exerciseName e i (Just ci))
-        ! A.value "yes"
-      H.div ! A.class_ "description" $ renderMarkdown choice
+    H.li $ do
+      let id = (exerciseName e i $ Just ci)
+      let name = if isSingle then exerciseName e i Nothing else id
+      let tpe = if isSingle then "radio" else "checkbox"
+      H.input 
+        ! A.type_ tpe
+        ! A.name name
+        ! A.id id
+        ! A.value (textValue choice)      
+      H.label ! A.for id $ 
+        H.div ! A.class_ "description" $ renderMarkdown choice
 makeExercisePart e i (ChoiceTable single choices rows) =
   H.div ! A.class_ "epart choice-table" $ do
     let tpe = if fromMaybe False single then "radio" else "checkbox"
