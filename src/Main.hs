@@ -14,12 +14,13 @@ import Text.Blaze.Html5 (
          toValue
        )
 import qualified Text.Blaze.Html5.Attributes as A
+import Text.Blaze(dataAttribute)
 import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 import Data.ByteString (readFile,writeFile,getContents)
 import Data.ByteString.Lazy.Char8 (putStrLn)
-import Control.Monad (forM_)
+import Control.Monad (forM_,zipWithM_)
 import Data.Monoid (mempty)
-import Data.Text (Text,append,unwords)
+import Data.Text (Text,append,unwords,pack)
 import Data.Char (toLower)
 import Data.Maybe (fromMaybe, maybeToList)
 import Text.Pandoc.Readers.Markdown
@@ -76,23 +77,22 @@ renderMarkdown txt = either renderError id result
 makeExercisePart :: Int -> Maybe Int -> ExercisePart -> H.Html
 makeExercisePart e i (Model.Markdown src            ) = renderMarkdown src
 makeExercisePart e i (Model.Image source float align) = do
-  let cls =
-        unwords
-          $  map (append "float-") (maybeToList float)
-          ++ map (append "align-") (maybeToList align)
-          ++ ["image"]
+  let cls = unwords
+        $  map (append "float-") (maybeToList float)
+        ++ map (append "align-") (maybeToList align)
+        ++ ["image"]
   H.div ! A.class_ (textValue cls) $ H.img ! A.src (textValue source)
-makeExercisePart e i (Input t) =
-  H.textarea
-    ! A.class_ ((toValue . map toLower . show) t)
-    ! A.name (exerciseName e i Nothing)
-    $ mempty
+makeExercisePart e i (Input t l) = H.div ! A.class_ (textValue cls) ! lattr $ mempty
+  where lattr = dataAttribute "language" $ maybe mempty textValue l
+        cls = unwords ["epart","input", pack $ map toLower $ show t]
 makeExercisePart e i (Choice single compact choices) = do
   let isSingle = fromMaybe False single
   let isCompact = fromMaybe False compact
-  let classNames =
-        textValue $ unwords $ (if isSingle then "single" else "multiple") :
-                              "choice" : map (const "compact") (filter id (maybeToList compact))
+  let classNames = textValue $ unwords $ 
+        "epart" : 
+        (if isSingle then "single" else "multiple") :
+        "choice" : 
+        map (const "compact") (filter id (maybeToList compact))  
   H.ul ! A.class_ classNames $ forM_ (zip choices [1 ..]) $ \(choice, ci) ->
     H.li $ H.label $ do
       if isSingle
@@ -108,9 +108,9 @@ makeExercisePart e i (Choice single compact choices) = do
         ! A.value "yes"
       H.div ! A.class_ "description" $ renderMarkdown choice
 makeExercisePart e i (ChoiceTable single choices rows) =
-  H.div ! A.class_ "figure" $ do
+  H.div ! A.class_ "epart choice-table" $ do
     let tpe = if fromMaybe False single then "radio" else "checkbox"
-    H.table ! A.class_ "choice-table" $ do
+    H.table $ do
       H.thead $ H.tr $ do
         H.th mempty
         forM_ choices (H.th . renderMarkdown)
@@ -122,6 +122,14 @@ makeExercisePart e i (ChoiceTable single choices rows) =
             ! A.type_ tpe
             ! A.name (exerciseName e i (Just rowi))
             ! A.value (textValue c)
+makeExercisePart e i (Combine left right) = 
+  H.div ! A.class_ "epart combine" $ do
+    H.div ! A.class_ "rights" $ 
+      forM_ right $ (H.div ! A.class_ "right" ! A.draggable "true") . renderMarkdown    
+    H.div ! A.class_ "lefts" $ 
+      forM_ left $ \content -> do
+        H.div ! A.class_ "left" $ renderMarkdown content
+        H.div ! A.class_ "placeholder" $ mempty
 
 isQPart :: ExercisePart -> Bool
 isQPart Model.Markdown{} = False

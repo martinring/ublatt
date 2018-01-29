@@ -19,7 +19,7 @@ data Exercise = Exercise {
   body :: [ExercisePart]
 } deriving (Generic,Show)
 
-data InputType = Free | Math deriving (Generic,Show)
+data InputType = Free | Math | Code deriving (Generic,Show)
 
 data ExercisePart = Markdown {
   source :: Text
@@ -28,7 +28,8 @@ data ExercisePart = Markdown {
   float :: Maybe Text,
   align :: Maybe Text
 } | Input {
-  inputType :: InputType
+  inputType :: InputType,
+  inputLanguage :: Maybe Text
 } | Choice {
   single :: Maybe Bool,  
   compact :: Maybe Bool,
@@ -37,6 +38,9 @@ data ExercisePart = Markdown {
   single :: Maybe Bool,
   choices :: [Text],
   rows :: [Text]
+} | Combine {
+  left :: [Text],
+  right :: [Text]
 } deriving (Generic,Show)
 
 data SheetInfo = SheetInfo {
