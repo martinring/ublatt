@@ -217,9 +217,9 @@ h2 .title {
 }
 
 .choice > li > label {
-  padding: 1rem 2rem;  
+  padding: 1rem 2rem;
   display: flex;
-  flex-flow: row nowrap;  
+  flex-flow: row nowrap;
   align-items: center;
 }
 
@@ -232,7 +232,7 @@ h2 .title {
   background-color: rgba(0,0,0,0.03);
 }
 
-.choice > li > input + label::before {  
+.choice > li > input + label::before {
   content: '✔';
   overflow: visible;
   font-size: 1.6rem;
@@ -240,7 +240,7 @@ h2 .title {
   margin-top: 0.1rem;
   border: 0.1rem solid #ccc;
   border-radius: 0.1rem;
-  transition: border-color 0.2s ease, 
+  transition: border-color 0.2s ease,
               color 0.2s ease,
               background-color 0.2s ease;
   width: 1rem;
@@ -255,19 +255,19 @@ h2 .title {
   border-radius: 50%;
 }
 
-.choice > li > input:checked + label::before {  
+.choice > li > input:checked + label::before {
   color: unset;
 }
 
 
 .choice > li > label > .description {
   margin-left: 1rem;
-  margin-right: 1rem;  
+  margin-right: 1rem;
   flex-grow: 1;
 }
 
 .choice.compact > li > label > .description {
-  margin-right: 0;  
+  margin-right: 0;
 }
 
 .choice > li > label > .description :first-child {
@@ -552,7 +552,7 @@ code span.in { /* Information */
   color: #c45b00;
 }
 code span.kw { /* Keyword */
-  color: #cfcfc2;
+  color: blue;
 }
 code span.op { /* Operator */
   color: #cfcfc2;
@@ -573,7 +573,7 @@ code span.ss { /* SpecialString */
   color: #da4453;
 }
 code span.st { /* String */
-  color: #f44f4f;
+  color: #800000;
 }
 code span.va { /* Variable */
   color: #27aeae;
