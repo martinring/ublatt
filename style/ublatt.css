@@ -223,21 +223,28 @@ h2 .title {
   align-items: center;
 }
 
-.choice > li > input {
+input[type=checkbox] + label, input[type=radio] + label {
+  padding: 1rem 2rem;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+input[type=checkbox], input[type=radio] {
   display: none;
 }
 
-.choice > li:hover > input + label::before {
+*:hover > input[type=checkbox] + label::before, *:hover >  input[type=radio] + label::before {
   border-color: #000;
   background-color: rgba(0,0,0,0.03);
 }
 
-.choice > li > input + label::before {
+input[type=checkbox] + label::before, input[type=radio] + label::before {
   content: '✔';
   overflow: visible;
-  font-size: 1.6rem;
   color: transparent;
   margin-top: 0.1rem;
+  font-size: 1.4rem;
   border: 0.1rem solid #ccc;
   border-radius: 0.1rem;
   transition: border-color 0.2s ease,
@@ -251,12 +258,12 @@ h2 .title {
   vertical-align: middle;
 }
 
-.choice > li > input[type=radio] + label::before {
+input[type=radio] + label::before {
   border-radius: 50%;
 }
 
-.choice > li > input:checked + label::before {
-  color: unset;
+input[type=checkbox]:checked + label::before, input[type=radio]:checked + label::before {
+  color: #0022cc;
 }
 
 
@@ -364,6 +371,7 @@ pre code {
 
 .epart.input {
   position: relative;
+  color: #0022cc;
 }
 
 .epart.input.free > .rendered {
@@ -376,6 +384,7 @@ pre code {
   width: calc(100% - 4rem);
   font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
   display: block;
+  color: #0022cc;
   padding: 1rem 2rem;
   border: 0.05rem solid #ddd;
   transition: border-color 0.3s ease;

@@ -22,6 +22,7 @@ import Control.Monad (forM_,zipWithM_)
 import Data.Monoid (mempty)
 import Data.Text (Text,append,unwords,pack)
 import Data.Char (toLower)
+import Data.List (intercalate)
 import Data.Maybe (fromMaybe, maybeToList)
 import Text.Pandoc.Readers.Markdown
 import Text.Pandoc.Writers.HTML
@@ -41,9 +42,9 @@ makeOptionalTitle :: Maybe Text -> H.Html
 makeOptionalTitle title =
   forM_ title $ \title -> H.span ! A.class_ "title" $ H.toHtml title
 
-exerciseName :: Int -> Maybe Int -> Maybe Int -> H.AttributeValue
-exerciseName e i s =
-  H.stringValue $ 'a' : show e ++ maybe "" show i ++ maybe "" show s
+exerciseName :: Int -> [Maybe Int] -> H.AttributeValue
+exerciseName e es =
+  H.stringValue $ 'a' : show e ++ intercalate "_" (map (maybe "" show) es)
 
 markdownOptions :: ReaderOptions
 markdownOptions =
@@ -95,8 +96,8 @@ makeExercisePart e i (Choice single compact choices) = do
         map (const "compact") (filter id (maybeToList compact))  
   H.ul ! A.class_ classNames $ forM_ (zip choices [1 ..]) $ \(choice, ci) ->
     H.li $ do
-      let id = (exerciseName e i $ Just ci)
-      let name = if isSingle then exerciseName e i Nothing else id
+      let id = (exerciseName e [i,Just ci])
+      let name = exerciseName e [i,Nothing]
       let tpe = if isSingle then "radio" else "checkbox"
       H.input 
         ! A.type_ tpe
@@ -105,21 +106,27 @@ makeExercisePart e i (Choice single compact choices) = do
         ! A.value (textValue choice)      
       H.label ! A.for id $ 
         H.div ! A.class_ "description" $ renderMarkdown choice
-makeExercisePart e i (ChoiceTable single choices rows) =
-  H.div ! A.class_ "epart choice-table" $ do
-    let tpe = if fromMaybe False single then "radio" else "checkbox"
+makeExercisePart e i (ChoiceTable single choices rows) = do
+  let isSingle = fromMaybe False single  
+  H.div ! A.class_ "epart choice-table" $ 
     H.table $ do
       H.thead $ H.tr $ do
         H.th mempty
         forM_ choices (H.th . renderMarkdown)
       H.tbody $ forM_ (zip rows [1 ..]) $ \(row, rowi) -> H.tr $ do
         H.td ! A.class_ "choicetable_rh" $ renderMarkdown row
-        forM_ choices $ \c ->
-          H.td
-            $ H.input
-            ! A.type_ tpe
-            ! A.name (exerciseName e i (Just rowi))
-            ! A.value (textValue c)
+        forM_ (zip choices [1..]) $ \(c, ci) -> do
+          let id = exerciseName e [i,Just rowi,Just ci]
+          let name = exerciseName e [i,Just rowi]
+          let tpe = if isSingle then "radio" else "checkbox"
+          H.td $ do
+            H.input
+              ! A.type_ tpe
+              ! A.name name
+              ! A.id id            
+              ! A.value (textValue c)
+            H.label ! A.for id $ mempty            
+          
 makeExercisePart e i (Combine left right) = 
   H.div ! A.class_ "epart combine" $ do
     H.div ! A.class_ "rights" $ 
