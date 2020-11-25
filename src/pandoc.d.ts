@@ -48,8 +48,6 @@ declare namespace pandoc {
 
   type ColSpec = [Alignment,ColWidth]
 
-  type Row = 
-
   type QuoteType = "SingleQuote" | "DoubleQuote"
   type MathType = "DisplayMath" | "InlineMath"
   type CitationMode = "AuthorInText" | "SuppressAuthor" | "NormalCitation"
