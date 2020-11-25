@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+$for(author-meta)$
+  <meta name="author" content="$author-meta$" />
+$endfor$
+$if(date-meta)$
+  <meta name="dcterms.date" content="$date-meta$" />
+$endif$
+$if(keywords)$
+  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+$endif$
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <style>
+    :root {
+      --sheet-num: '$sheet$';
+$if(strings.sheet-title)$
+      --sheet-title: '$strings.sheet-title$';
+$endif$
+$if(strings.issued)$
+      --issued: '$strings.issued$';
+$endif$
+$if(strings.due)$
+      --due: '$strings.due$';      
+$endif$
+$if(due)$
+      --due-display: block;
+$endif$
+    }    
+  </style>
+$for(css)$
+  <link rel="stylesheet" href="$css$" />
+$endfor$
+$if(math)$
+  $math$
+$endif$
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+<script>
+  metadata = $meta-json$
+</script>
+<script src="ublatt.js"></script>
+$for(include)$
+  <script src="modules/$include$.js"></script>
+$endfor$
+$for(header-includes)$
+  $header-includes$
+$endfor$
+</head>
+<body>
+$for(include-before)$
+$include-before$
+$endfor$
+<form class="ublatt">
+<div class="head">
+$if(title)$
+<span class="title">$title$</span>
+$endif$
+$if(subtitle)$
+<span class="term">$subtitle$</span>
+$endif$
+<ul class="lecturers">
+$for(author)$
+<li>$author$</li>
+$endfor$
+</ul>
+$if(sheet)$
+<span class="sheetnum">$sheet$</span>
+$endif$
+$if(date)$
+<span class="issued">$date$</span>
+$endif$    
+$if(due)$
+<span class="issued">$due$</span>
+$endif$    
+</div>
+<div class="main">
+
+$if(toc)$
+<nav id="$idprefix$TOC" role="doc-toc">
+$if(toc-title)$
+<h2 id="$idprefix$toc-title">$toc-title$</h2>
+$endif$
+$table-of-contents$
+</nav>
+$endif$
+
+$body$
+</div>
+<div class="submit">
+  <div>
+    <h1>Autoren</h1>
+    <table id="authors">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Matrikelnummer</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>        
+      </tbody>            
+    </table>  
+    <p class="center">
+      <a class="icon" onclick="ublatt.addAuthor()"><img src="node_modules/@icon/font-awesome/icons/plus.svg"></a>
+      <a class="icon" onclick="ublatt.removeAuthor()"><img src="node_modules/@icon/font-awesome/icons/minus.svg"></a>
+    </p>
+  </div>  
+  <div>
+    <h1>Abgabe</h1> 
+    <p>
+      Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure Lösung.
+      Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail. 
+    </p>
+    <div class="buttons">
+      <a onclick="ublatt.save()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/save.svg">Speichern</a>
+      <a onclick="ublatt.load()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/folder-open.svg">Laden</a>
+      <a onclick="ublatt.clearSheet()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/trash.svg">Leeren</a>
+    </div>  
+  </div>
+</div>
+</form>
+$for(include-after)$
+$include-after$
+$endfor$
+</body>
+</html>

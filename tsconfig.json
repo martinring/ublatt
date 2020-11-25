@@ -1,0 +1,10 @@
+{
+    "include": ["src/**/*.ts"],    
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "lib": ["dom","es6"],        
+        "rootDir": "src",
+        "strict": true
+    }
+}

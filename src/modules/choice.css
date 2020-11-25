@@ -1,0 +1,76 @@
+.choice table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.choice th {
+    padding: 1rem 0;
+}
+
+.choice table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.choice>ul, .choice>ol {
+    display: flex;
+    margin: auto;
+    padding: 0;
+    flex-flow: column nowrap;
+}
+
+.choice.compact>ul, .choice.compact>ol {
+    justify-content: center;
+    flex-flow: row wrap;
+}
+
+.choice>ul>li {
+    list-style: none;
+    padding: 0;
+    transition: background-color 0.3s ease;
+}
+
+.choice.compact>ul>li, .choice.compact>ol>li {
+    margin-right: -1.5rem;
+}
+
+.choice>ul>li:hover, .choice>ol>li:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.choice>ul>li>label, .choice>ol>li>label {
+    padding: 1rem 2rem;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+}
+
+.choice>ul>li>label>.description, .choice>ol>li>label>.description {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    flex-grow: 1;
+}
+
+.choice.compact>ul>li>label>.description, .choice.compact>ol>li>label>.description {
+    margin-right: 0;
+}
+
+.choice>ul>li>label>.description :first-child, .choice>ol>li>label>.description :first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.choice>ul>li>label>.description :last-child, .choice>ol>li>label>.description :last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.choice>table {
+    margin-bottom: 2rem;
+}
+
+.choice>ul, .choice>ol {
+    list-style: none;
+}
+
+.choice.row-header>table td:first-child {
+    text-align: left;
+}
