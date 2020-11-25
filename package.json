@@ -1,5 +1,10 @@
 {
     "name": "ublatt",
+    "files": [
+        "*",
+        "dist/*"
+    ],
+    "main": "dist/ublatt.js",
     "version": "1.0.0",
     "description": "An interactive exercise sheet generator",
     "homepage": "https://github.com/martinring/ublatt",
@@ -11,11 +16,16 @@
         "build:css": "postcss src/*.css src/**/*.css --base src --dir dist",
         "clean": "rm -rf dist"
     },
-    "author": "Martin Ring <martin.ring@dfki.de> (https://www.martinring.de)",    
+    "author": "Martin Ring <martin.ring@dfki.de> (https://www.martinring.de)",
     "repository": "github:martinring/ublatt",
     "type": "module",
-    "bin": "bin/ublatt.sh",
-    "os" : [ "darwin", "linux" ],
+    "bin": {
+        "ublatt": "bin/ublatt.sh"
+    },
+    "os": [
+        "darwin",
+        "linux"
+    ],
     "dependencies": {
         "@icon/font-awesome": "^4.7.0-2",
         "codemirror": "^5.58.2",
