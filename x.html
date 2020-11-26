@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="ublatt"/>
+  <title>1. Übungsblatt - Systeme hoher Sicherheit und Qualität WiSe 20/21</title>
+  <style>
+    :root {
+      --sheet-num: '1';
+      --due-display: block;
+    }    
+  </style>  
+  <link rel="stylesheet" href="dist/ublatt.css"/>
+  <link rel="stylesheet" href="dist/modules/choice.css"/>
+  <link rel="stylesheet" href="dist/modules/input.css"/>
+<script>
+  metadata = {"lang":"de-DE","title":"Systeme hoher Sicherheit und Qualität","subtitle":"WiSe 20/21","author":["Dieter Hutter","Jil Tietjen","Martin Ring"],"sheet":1,"date":"18.11.2020","due":"25.11.2020"}
+</script>
+  <script src="dist/ublatt.js"></script>
+  <script src="dist/modules/choice.js"></script>
+  <script src="dist/modules/input.js"></script>
+  <script src="dist/modules/input/markdown.js"></script>
+</head>
+<body>
+<form class="ublatt">
+<div class="head">
+<span class="title">Systeme hoher Sicherheit und Qualität</span>
+<span class="term">WiSe 20/21</span>
+<ul class="lecturers">
+<li>Dieter Hutter</li>
+<li>Jil Tietjen</li>
+<li>Martin Ring</li>
+</ul>
+<span class="sheetnum">1</span>
+<span class="issued">18.11.2020</span>
+<span class="issued">25.11.2020</span>
+</div>
+<div class="main">
+<section>
+<h1>Sicherheit vs. Sicherheit</h1>
+<ol>
+<li>
+<p>Welche der folgenden Eigenschaften eines Systems können in Problemen mit  der Informationssicherheit (<strong>Security</strong>) münden und welche in Problemen der Betriebssicherheit (<strong>Safety</strong>)? Gibt es Eigentschaften, die sowohl Safety als auch Security betreffen?</p>
+<div class="choice">
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th>Safety</th>
+<th>Security</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Passwörter werden in Klartext hinterlegt</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">Keine redundante Stromversorgung ist vorhanden</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">Pufferüberläufe werden nicht behandelt</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">Kommunikation über einen unverschlüsselten öffentlichen Kanal</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+<li>
+<p>Stellen sie sich vor, sie entwickeln ein neuartiges System, welches
+mittels fokussierter hochenergetischer Laserstrahlen Energie über weite Strecken auf der Erde verteilen kann. Um die Erdkrümmung zu überwinden, installieren sie ein Netz aus Satelliten, welche durch elektronisch geregelte Spiegel den Laserstrahl zur Zielstationen leiten. Nennen sie jeweils drei kritische Safety bzw. Security Probleme, welche auftreten können.</p>
+<p>Safety Probleme:</p>
+<p><span class="input markdown"> </span></p>
+<p>Security Probleme:</p>
+<p><span class="input markdown"> </span></p>
+</li>
+</ol>
+</section>
+<section>
+<h1>Safety Integrity Level</h1>
+<p>Führen sie für Folgendes System eine Qualitative Sicherheitsanalyse nach <em>DIN EN ISO 13849:1</em> durch.</p>
+<blockquote>
+<p><em>Ein Picking-Roboter in einer automatisierten Lagerhalle</em>: Ein 2 Tonnen
+schwerer Roboter, der automatisch mit bis zu 5 km/h Lagerregale anfährt
+und Waren entnimmt, bzw. einsortiert. Außer dem Roboter befindet sich in
+der Lagerhalle nur geschultes Personal, welches die Waren für den Versand
+fertig macht.</p>
+</blockquote>
+<p>Was ist das resultierende Performance Level bzw. Safety Integrity Level??</p>
+<div class="compact single choice">
+<ul>
+<li>a</li>
+<li>b (SIL 1)</li>
+<li>c (SIL 2)</li>
+<li>d (SIL 3)</li>
+<li>e (SIL 4)</li>
+</ul>
+</div>
+<p>Bei einer quantitativen Analyse könnte sich das Ergebnis in diesem Szenario unterscheiden, warum?</p>
+<p><span class="input markdown"> </span></p>
+</section>
+
+</div>
+<div class="submit">
+  <div>
+    <h1>Autoren</h1>
+    <table id="authors">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Matrikelnummer</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>        
+      </tbody>            
+    </table>  
+    <p class="center">
+      <a class="icon" onclick="ublatt.addAuthor()"><img src="node_modules/@icon/font-awesome/icons/plus.svg"></a>
+      <a class="icon" onclick="ublatt.removeAuthor()"><img src="node_modules/@icon/font-awesome/icons/minus.svg"></a>
+    </p>
+  </div>  
+  <div>
+    <h1>Abgabe</h1> 
+    <p>
+      Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure Lösung.
+      Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail. 
+    </p>
+    <div class="buttons">
+      <a onclick="ublatt.save()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/save.svg">Speichern</a>
+      <a onclick="ublatt.load()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/folder-open.svg">Laden</a>
+      <a onclick="ublatt.clearSheet()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/trash.svg">Leeren</a>
+    </div>  
+  </div>
+</div>
+</form>
+</body>
+</html>

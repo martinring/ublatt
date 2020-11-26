@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="ublatt"/>
+{{#each authors}}
+  <meta name="author" content="{{this}}"/>
+{{/each}}
+  <title>{{$pagetitle}}</title>
+  <style>
+    :root {
+      --sheet-num: '{{sheet}}';
+{{#each i18n}}
+      --i18n-{{@key}}: '{{this}}';
+{{/each}}
+{{#if due}}
+      --due-display: block;
+{{/if}}
+    }    
+  </style>  
+{{#each $css}}
+  <link rel="stylesheet" href="{{@key}}"/>
+{{/each}}
+<script>
+  metadata = {{{$meta-json}}}
+</script>
+{{#each $js}}
+  <script src="{{@key}}"></script>
+{{/each}}
+</head>
+<body>
+<form class="ublatt">
+<div class="head">
+<span class="title">{{title}}</span>
+{{#if subtitle}}
+<span class="term">{{subtitle}}</span>
+{{/if}}
+<ul class="lecturers">
+{{#each author}}
+<li>{{this}}</li>
+{{/each}}
+</ul>
+<span class="sheetnum">{{sheet}}</span>
+<span class="issued">{{date}}</span>
+{{#if due}}
+<span class="issued">{{due}}</span>
+{{/if}}   
+</div>
+<div class="main">
+{{{$body}}}
+</div>
+<div class="submit">
+  <div>
+    <h1>Autoren</h1>
+    <table id="authors">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Matrikelnummer</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>        
+      </tbody>            
+    </table>  
+    <p class="center">
+      <a class="icon" onclick="ublatt.addAuthor()"><img src="node_modules/@icon/font-awesome/icons/plus.svg"></a>
+      <a class="icon" onclick="ublatt.removeAuthor()"><img src="node_modules/@icon/font-awesome/icons/minus.svg"></a>
+    </p>
+  </div>  
+  <div>
+    <h1>Abgabe</h1> 
+    <p>
+      Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure Lösung.
+      Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail. 
+    </p>
+    <div class="buttons">
+      <a onclick="ublatt.save()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/save.svg">Speichern</a>
+      <a onclick="ublatt.load()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/folder-open.svg">Laden</a>
+      <a onclick="ublatt.clearSheet()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/trash.svg">Leeren</a>
+    </div>  
+  </div>
+</div>
+</form>
+</body>
+</html>

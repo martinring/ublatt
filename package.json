@@ -20,7 +20,7 @@
     "repository": "github:martinring/ublatt",
     "type": "module",
     "bin": {
-        "ublatt": "bin/ublatt.sh"
+        "ublatt": "bin/ublatt.js"
     },
     "os": [
         "darwin",
@@ -29,24 +29,26 @@
     "dependencies": {
         "@icon/font-awesome": "^4.7.0-2",
         "codemirror": "^5.58.2",
+        "handlebars": "4.7.6",
         "katex": "^0.12.0",
-        "markdown-it": "^12.0.2",
+        "markdown-it": "^11.0.0",
+        "markdown-it-attrs": "^3.0.3",
+        "markdown-it-bracketed-spans": "^1.0.1",
         "markdown-it-container": "^3.0.0",
+        "markdown-it-header-sections": "^1.0.0",
+        "markdown-it-texmath": "0.8.0",
         "mermaid": "^8.8.3",
         "prismjs": "1.21.0",
         "typeface-jetbrains-mono": "2.0.0",
-        "typeface-tex-gyre-pagella": "0.0.44"
+        "typeface-tex-gyre-pagella": "0.0.44",
+        "yaml": "^1.10.0",
+        "yargs": "16.1.1"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "16.0.0",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "9.0.0",
         "@rollup/plugin-typescript": "^6.1.0",
-        "@types/codemirror": "^0.0.98",
-        "@types/katex": "^0.11.0",
-        "@types/markdown-it": "^10.0.3",
-        "@types/mermaid": "8.2.1",
-        "@types/prismjs": "1.9.0",
         "cssnano": "^4.1.10",
         "postcss": "^8.1.10",
         "postcss-cli": "8.3.0",

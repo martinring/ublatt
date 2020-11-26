@@ -1,15 +1,8 @@
 # ublatt
 
-ublatt is an interactive exercise sheet generator based on [pandoc](https://www.pandoc.org).
+ublatt is an interactive exercise sheet generator.
 
 ## installation
-
-requirements: 
-
-- [pandoc](https://www.pandoc.org/installing.html) version 2.11 or above
-- [node.js](https://nodejs.org/)
-
-install with 
 
 ````bash
 > npm install ublatt
@@ -18,5 +11,5 @@ install with
 ## run
 
 ````bash
-> ublatt <input.md> -o <output.html>
+> ublatt [input.md] [--meta course.yaml]
 ````

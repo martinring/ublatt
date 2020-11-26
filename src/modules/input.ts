@@ -23,7 +23,7 @@ if (!window.ublatt) {
   }
 
   window.ublatt.registerExerciseType('input', function (elem,name) {            
-      let text = elem.textContent
+      let text = elem.textContent?.trim()
       elem.innerHTML = ""
       let tpe = Object.keys(inputModes).find((x) => elem.classList.contains(x))
       if (tpe) {
@@ -68,7 +68,7 @@ if (!window.ublatt) {
             errorMarker = null;
             let before = rendered.innerHTML;
             try {
-              if (editor.getValue().length > 0) {
+              if (editor.getValue().trim().length > 0) {
                 inputMode.render(editor.getValue(),rendered,name);
               } else {
                 rendered.innerHTML = "";
@@ -97,7 +97,7 @@ if (!window.ublatt) {
               elem.classList.add("editing");          
           } })
           try {
-            if (editor.getValue().length > 0) {
+            if (editor.getValue().trim().length > 0) {
               inputMode.render(editor.getValue(),rendered,name);
             }
           } catch (e) {

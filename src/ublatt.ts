@@ -9,8 +9,9 @@ let authorTable: Element | undefined
 let authors: Array<View<Author>> = []
 
 document.addEventListener("DOMContentLoaded",() => {
-    document.querySelectorAll('section').forEach((section) => {
-        let sec = 'e' + section.dataset["number"]
+    var cnt = 1
+    document.querySelectorAll('form.ublatt > .main > section').forEach((section) => {
+        let sec = 'e' + cnt++
         let selector = Array.from(exerciseTypes.keys()).map((x) => "." + x).join(', ')
         console.log(selector)
         section.querySelectorAll(selector).forEach((part,n) => {

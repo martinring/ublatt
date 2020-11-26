@@ -6,17 +6,17 @@ body {
   background-color: #fff;
 }
 
-ol[type="a"] {
+form.ublatt > .main > section > ol {
   counter-reset: list;
   margin: 0;
 }
 
-ol[type="a"] > li {
+form.ublatt > .main > section > ol > li {
   list-style: none;
   position: relative;
 }
 
-ol[type="a"] > li:before {
+form.ublatt > .main > section > ol > li:before {
   counter-increment: list;
   content: "(" counter(list, lower-alpha) ") ";
   position: absolute;
@@ -171,26 +171,20 @@ td {
   border-bottom: 0.1rem solid #ddd;
 }
 
-h1 .header-section-number {
-  font-size: 1.44rem;
-  display: inline-block;
-  border: 0.0667rem solid black;
-  padding: 0.1rem 0.2rem 0rem 0.2rem;
-  text-align: center;
-  font-weight: normal;
-  margin-right: 0.5rem;
+form.ublatt > .main {
+  counter-reset: h1
 }
 
-h1 .header-section-number::before {
-  content: var(--sheet-num) '.';
-}
-
-h2 .header-section-number,
-h3 .header-section-number,
-h4 .header-section-number,
-h5 .header-section-number,
-h6 .header-section-number {
-  display: none;
+form.ublatt > .main h1:before {
+    counter-increment: h1;
+    content: var(--sheet-num) '.' counter(h1);
+    font-size: 1.44rem;
+    display: inline-block;
+    border: 0.0667rem solid black;
+    padding: 0.1rem 0.2rem 0rem 0.2rem;
+    text-align: center;
+    font-weight: normal;
+    margin-right: 0.5rem;
 }
 
 section > h1:first-child {
@@ -237,7 +231,7 @@ input[type=checkbox] + label::before, input[type=radio] + label::before {
               background-color 0.2s ease;
   width: 1rem;
   height: 1rem;
-  line-height: 1.3rem;
+  line-height: 1rem;
   flex-shrink: 0;
   text-align: center;
   vertical-align: middle;
