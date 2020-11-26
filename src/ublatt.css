@@ -200,11 +200,11 @@ section > h1:first-child {
   font-style: italic;
 }
 
-figure {
+.figure {
   text-align: center;
 }
 
-figure img {
+.figure img {
   max-width: 80%;
 }
 
