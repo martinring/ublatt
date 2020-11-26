@@ -70,8 +70,8 @@ yargs(hideBin(process.argv))
         "type": "string",
         "description": "input markdown file (defaults to stdin)"
      })
-     .option('template',{
-       "default": __dirname + "/templates/ublatt.html2"
+     .option('template',{       
+       "default": __dirname + "/templates/ublatt.html"
      })
      .option('meta',{
        "type": 'array'
