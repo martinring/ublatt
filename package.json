@@ -27,7 +27,7 @@
         "linux"
     ],
     "dependencies": {
-        "@icon/font-awesome": "^4.7.0-2",
+        "@fortawesome/fontawesome-free": "5.14.0",
         "codemirror": "^5.58.2",
         "handlebars": "4.7.6",
         "katex": "^0.12.0",

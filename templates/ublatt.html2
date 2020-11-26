@@ -65,8 +65,8 @@
       </tbody>            
     </table>  
     <p class="center">
-      <a class="icon" onclick="ublatt.addAuthor()"><img src="node_modules/@icon/font-awesome/icons/plus.svg"></a>
-      <a class="icon" onclick="ublatt.removeAuthor()"><img src="node_modules/@icon/font-awesome/icons/minus.svg"></a>
+      <a class="icon" onclick="ublatt.addAuthor()"><i class="fas fa-plus"></i></a>
+      <a class="icon" onclick="ublatt.removeAuthor()"><i class="fas fa-minus"></i></a>
     </p>
   </div>  
   <div>
@@ -76,9 +76,9 @@
       Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail. 
     </p>
     <div class="buttons">
-      <a onclick="ublatt.save()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/save.svg">Speichern</a>
-      <a onclick="ublatt.load()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/folder-open.svg">Laden</a>
-      <a onclick="ublatt.clearSheet()" class="icon large"><img src="node_modules/@icon/font-awesome/icons/trash.svg">Leeren</a>
+      <a onclick="ublatt.save()" class="icon large"><i class="fas fa-2x fa-save"></i> Speichern</a>
+      <a onclick="ublatt.load()" class="icon large"><i class="fas fa-2x fa-folder-open"></i> Laden</a>
+      <a onclick="ublatt.clearSheet()" class="icon large"><i class="fas fa-2x fa-trash"></i> Leeren</a>
     </div>  
   </div>
 </div>

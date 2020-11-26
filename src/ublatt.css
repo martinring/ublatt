@@ -1,6 +1,13 @@
 @import url("../node_modules/katex/dist/katex.css");
 @import url("../node_modules/typeface-jetbrains-mono/dist/index.css");
 @import url("../node_modules/typeface-tex-gyre-pagella/index.css");
+@import url("../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css");
+@import url("../node_modules/@fortawesome/fontawesome-free/css/solid.css");
+
+i {
+  font-family: font-awesome;
+  font-style: normal;
+}
 
 body {
   background-color: #fff;
@@ -531,12 +538,12 @@ a:hover {
   text-align: center;
 }
 
-.icon > img {
+.icon > i {
   width: 1rem;
   height: 1rem;
 }
 
-.icon.large > img {
+.icon.large > i {
   width: 2rem;
   height: 2rem;
   vertical-align: middle;
