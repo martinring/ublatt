@@ -1,9 +1,9 @@
-@import url('../../node_modules/codemirror/lib/codemirror.css');
 .input {
     display: block;
     position: relative;
     color: #0022cc;
 }
+
 
 .input.default>.rendered {
     visibility: hidden;
@@ -33,6 +33,7 @@
     outline: none;
     border: 0.05rem solid #000;
 }
+
 
 .input.rendered>.rendered {
     grid-column: 1/3;
@@ -76,9 +77,16 @@
     z-index: 10000;
 }
 
-.input>.editor>.CodeMirror {
+.input>.editor>.cm-wrap {
     background: #eee;
     height: auto;
+    max-height: 200px;
+    border: none;
+    font-size: 14px;
+}
+
+.input>.editor>.ͼ1.cm-focused {
+    outline: none;
 }
 
 .input>.help {
@@ -139,23 +147,10 @@
     color: #f44336;
 }
 
-.input .CodeMirror {
+.input .cm-wrap {
     font-family: "JetBrains Mono";
 }
 
-.input .CodeMirror .error {
-    position: relative;
-}
-
-.input .CodeMirror .error:after {
-    content: "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-    font-weight: bold;
-    color: #f44336;
-    position: absolute;
-    letter-spacing: -0.2em;
-    left: 0;
-    top: 0.5em;
-    right: 0;
-    height: 1em;
-    overflow: hidden;
+.input .ͼ1 .cm-scroller {
+    font-family: "JetBrains Mono" !important;
 }

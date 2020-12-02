@@ -1,0 +1,33 @@
+<div class="submit">
+    <div>
+        <h1>Autoren</h1>
+        <table id="authors">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Matrikelnummer</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <p class="center">
+            <a class="icon" onclick="ublatt.addAuthor()"><i class="fas fa-plus"></i></a>
+            <a class="icon" onclick="ublatt.removeAuthor()"><i class="fas fa-minus"></i></a>
+        </p>
+    </div>
+    <div>
+        <h1>Abgabe</h1>
+        <p>
+            Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure Lösung.
+            Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail.
+        </p>
+        <div class="buttons">
+            <a onclick="ublatt.save()" class="icon large"><i class="fas fa-2x fa-save"></i> Speichern</a>
+            <a onclick="ublatt.load()" class="icon large"><i class="fas fa-2x fa-folder-open"></i> Laden</a>
+            <a onclick="ublatt.clearSheet()" class="icon large"><i class="fas fa-2x fa-trash"></i> Leeren</a>
+        </div>
+    </div>
+</div>

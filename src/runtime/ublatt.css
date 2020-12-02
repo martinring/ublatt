@@ -1,8 +1,8 @@
-@import url("../node_modules/katex/dist/katex.css");
-@import url("../node_modules/typeface-jetbrains-mono/dist/index.css");
-@import url("../node_modules/typeface-tex-gyre-pagella/index.css");
-@import url("../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css");
-@import url("../node_modules/@fortawesome/fontawesome-free/css/solid.css");
+@import url("../../node_modules/katex/dist/katex.css");
+@import url("../../node_modules/typeface-jetbrains-mono/dist/index.css");
+@import url("../../node_modules/typeface-tex-gyre-pagella/index.css");
+@import url("../../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css");
+@import url("../../node_modules/@fortawesome/fontawesome-free/css/solid.css");
 
 i {
   font-family: font-awesome;
@@ -96,14 +96,24 @@ form.ublatt .head .sheetnum {
 form.ublatt .head .sheetnum:after {
   content: '. ' var(--sheet-title,'Übungsblatt')
 }
+
 form.ublatt .head .issued, form.ublatt .head .due {
   grid-column: left2;
   font-size: 1.2rem;
   line-height: 1.2;
 }
+
+form.ublatt .head .issued {
+  grid-row: 3;
+}
+
+form.ublatt .head .due {  
+  grid-row: 4;
+}
+
 form.ublatt .head::before, form.ublatt .head::after {
   font-size: 1.2rem;
-  line-height: 1.2;  
+  line-height: 1.2;
   grid-column: left;
   font-weight: bold;
   padding-right: 1em;
@@ -169,12 +179,11 @@ table {
   content: "Figure " counter(figure);
 }*/
 th {
-  padding: 0 1em;
+  padding: 0.5rem 1rem;
   border-bottom: 0.1rem solid black;
 }
 td {
-  padding: 0 1em;
-  text-align: center;
+  padding: 0.5rem 1rem;  
   border-bottom: 0.1rem solid #ddd;
 }
 
@@ -182,7 +191,7 @@ form.ublatt > .main {
   counter-reset: h1
 }
 
-form.ublatt > .main h1:before {
+form.ublatt > .main > section > h1:before {
     counter-increment: h1;
     content: var(--sheet-num) '.' counter(h1);
     font-size: 1.44rem;
@@ -194,7 +203,7 @@ form.ublatt > .main h1:before {
     margin-right: 0.5rem;
 }
 
-section > h1:first-child {
+form.ublatt > .main > section > h1:first-child {
   font-size: 1.44rem;
   font-weight: normal;
   font-style: italic;
@@ -208,9 +217,8 @@ section > h1:first-child {
   max-width: 80%;
 }
 
-
 input[type=checkbox] + label, input[type=radio] + label {
-  padding: 1rem 2rem;
+  padding: 1rem;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
@@ -231,8 +239,7 @@ input[type=checkbox] + label::before, input[type=radio] + label::before {
   color: transparent;
   margin-bottom: 0.1rem;
   font-size: 1.4rem;
-  border: 0.1rem solid #ccc;
-  border-radius: 0.1rem;
+  border: 0.1rem solid #ccc;  
   transition: border-color 0.2s ease,
               color 0.2s ease,
               background-color 0.2s ease;
@@ -242,6 +249,7 @@ input[type=checkbox] + label::before, input[type=radio] + label::before {
   flex-shrink: 0;
   text-align: center;
   vertical-align: middle;
+  margin-right: -0.6rem;
 }
 
 input[type=radio] + label::before {
@@ -470,8 +478,8 @@ code span.wa { /* Warning */
 
 .submit {
   background: #eee;
-  margin: 0 -3rem -2rem -3rem;
-  padding: 2rem 3rem;
+  margin: 2rem -3rem -2rem -3rem;
+  padding: 0 3rem 2rem 3rem;
   display: flex;
   flex-direction: row;  
   justify-content: space-between;

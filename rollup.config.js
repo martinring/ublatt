@@ -11,15 +11,15 @@ function makeModule(base) {
         const v = a[1]
         const submodules = Array.from(v.submodules.entries()).flatMap(makeModule(base + "/" + k))
         submodules.unshift({
-            input: "src/modules" + base + '/' + k + ".ts",
+            input: "src/runtime/modules" + base + '/' + k + ".ts",
             output: {
-                file: 'dist/modules' + base + '/' + k + '.js' ,
-                format: 'iife'
+                file: 'dist/runtime/modules' + base + '/' + k + '.js' ,
+                format: 'es'
             },
             plugins: [
                 nodeResolve({ preferBuiltins: false }),
-                typescript(),
                 commonjs(),
+                typescript({ "tsconfig": "src/runtime/tsconfig.json"}),
                 json()
             ]
         })
@@ -27,18 +27,18 @@ function makeModule(base) {
     }
 }
 
-const modules = Array.from(extractModules(__dirname + "/src/modules").entries()).flatMap(makeModule(''));
+const modules = Array.from(extractModules(__dirname + "/src/runtime/modules").entries()).flatMap(makeModule(''));
 
 modules.unshift({
-    input: "src/ublatt.ts",
+    input: "src/runtime/ublatt.ts",
     output: {
-        dir: 'dist',
+        dir: 'dist/runtime',
         format: 'es'
     },
     plugins: [
-        typescript(),
         nodeResolve(),
-        commonjs()
+        commonjs(),
+        typescript({ "tsconfig": "src/runtime/tsconfig.json"}),
     ]
 })
 

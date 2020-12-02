@@ -1,67 +1,26 @@
 #!/usr/bin/env node
 import * as fs from 'fs';
 import * as path from 'path';
-import * as child_process from 'child_process';
 import * as process from 'process';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers'
 import { fileURLToPath } from 'url';
-import markdownit from 'markdown-it';
-import container from 'markdown-it-container';
-import texmath from 'markdown-it-texmath';
-import katex from 'katex';
-import bspans from 'markdown-it-bracketed-spans';
-import attrs from 'markdown-it-attrs';
-import secs from 'markdown-it-header-sections';
+import { rollup } from 'rollup';
+import virtual from '@rollup/plugin-virtual';
+import includepaths from 'rollup-plugin-includepaths';
+
+import Markdown from '../dist/cli/markdown.js'
+import * as Metadata from '../dist/cli/metadata.js'
 
 import handlebars from 'handlebars';
 
 import extractModules from '../modules.js';
 
-import yaml from 'yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(path.dirname(__filename));
 
-const modules = extractModules(__dirname + '/dist/modules');
-
-function extractMetadata(input,meta) {
-  const lines = input.split('\n')
-  var start = null
-  var blank = true
-  var i = 0
-  var buf = ""
-  while (i < lines.length) {
-    if (typeof start == "number") {        
-      if (lines[i].match(/^(---|...)\s*$/)) {
-        try {
-          const x = yaml.parse(buf)
-          Object.keys(x).forEach(key => {
-            meta[key] = x[key]
-          })
-          lines.splice(start,i-start + 1)
-        } catch (e) {                     
-          i = i - (i - start + 1)
-        }
-        start = null
-        blank = false
-        buf = ""
-      } else {
-        buf += lines[i] + "\n"
-      }
-    } else {
-      if (blank && lines[i].match(/^---\s*$/)) {
-        start = i
-      } else if (lines[i].match(/^\s*$/)) {
-        blank = true
-      } else {
-        blank = false
-      }
-    }
-    i += 1;
-  }
-  return lines.join('\n');
-}
+const modules = extractModules(__dirname + '/dist/runtime/modules');
 
 yargs(hideBin(process.argv))
   .command('$0 [input..]', 'Interactive exercise sheet generator', (x) => {
@@ -70,91 +29,108 @@ yargs(hideBin(process.argv))
         "type": "string",
         "description": "input markdown file (defaults to stdin)"
      })
+     .option('standalone',{
+       "type": "boolean",
+       "default": false
+     })
      .option('template',{       
        "default": __dirname + "/templates/ublatt.html"
-     })
+     })     
      .option('meta',{
        "type": 'array'
      })
-  }, (args) => {        
+  }, async (args) => {        
+    
     const f = (args.input || [0]).map(x => fs.readFileSync(x).toString('utf-8')).join('\n\n');
+    
     const meta = {
-      "lang": Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0]
+      "lang": Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0],
     };    
+
     if (args.meta) {
       args.meta.forEach(x => {
         const src = fs.readFileSync(x).toString('utf-8')
-        const m = yaml.parse(src)
-        Object.keys(m).forEach(k => { 
-          meta[k] = m[k]
-        })
+        const m = Metadata.parseMetadata(src)        
+        Metadata.mergeMetadata(m,meta)        
       })
-    }
-    const markdown = extractMetadata(f,meta);
-    meta['$meta-json'] = JSON.stringify(meta);    
-    meta['$js'] = { "dist/ublatt.js" : true };
-    meta['$css'] = { "dist/ublatt.css" : true };
+    }    
+    
+    const markdown = Metadata.extractMetadata(f,meta);    
 
-    function findModules(base,modules,classes) {
+    const imports = [
+      "import Ublatt from './dist/runtime/ublatt.js'"
+    ]    
+    const inits = [
+      `const meta = ${JSON.stringify(meta)}`,
+      `const ublatt = new Ublatt(document.querySelector('form.ublatt'),meta)`,
+      `window.ublatt = ublatt`
+    ]
+ 
+    meta['$meta-json'] = JSON.stringify(meta);        
+    
+    meta['$css'] = ["./dist/runtime/ublatt.css"];
+
+    function findModules(base,modules,classes,parent) {
       if (modules.size > 0) {        
         classes.forEach(c => {
-          if (modules.has(c)) {            
-            meta['$js'][base + "/" + c + ".js"] = true
-            if (modules.get(c).css) {
-              meta['$css'][base + "/" + c + ".css"] = true
+          if (modules.has(c)) {
+            if (!modules.get(c).imported) {
+              modules.get(c).imported = true
+              imports.push(`import ${c.charAt(0).toUpperCase() + c.slice(1)} from '${base}/${c}.js'`)
+              inits.push(`const ${c} = new ${c.charAt(0).toUpperCase() + c.slice(1)}()`)
+              inits.push(`${parent}.registerModule('${c}',${c})`)
+              if (modules.get(c).css) {
+                meta['$css'].push(base + "/" + c + ".css")
+              }
             }
-            findModules(base + "/" + c, modules.get(c).submodules, classes)
+            findModules(base + "/" + c, modules.get(c).submodules, classes, c)
           }
         })
       }
     }
 
-    const md = markdownit()
-      .use(container, 'classes', {
-        validate(params) {
-          return params.trim().match(/^(\w+\s+)*\w+$/)
-        },
-        render(tokens, idx) {
-          const classes = tokens[idx].info.trim().split(/\s+/)    
-          findModules("dist/modules",modules,classes);
-          if (tokens[idx].nesting === 1) {
-            // opening tag
-            return `<div class="${classes.join(' ')}">\n`;
-          } else {
-            // closing tag
-            return '</div>\n';
-          }
-        }
-      })
-      .use(texmath, { engine: katex, delimiters: 'dollars' })
-      .use(bspans)
-      .use(attrs)
-      .use(secs)
+    const md = new Markdown(x => findModules("./dist/runtime/modules",modules,x,"ublatt"))
+    meta['$body'] = md.render(markdown);
+    inits.push('ublatt.init()') 
 
-    const renderAttrs = md.renderer.renderAttrs
+    meta['$script'] = imports.join("; ") + ";" + inits.join("; ")
 
-    md.renderer.renderAttrs = function(tkn) {
-      if (tkn.attrs) {
-        const c = tkn.attrs.find(x => x && x[0] == "class")
-        if (c) {
-          const classes = c[1].split(/\s+/);          
-          findModules("dist/modules",modules,classes);
-        }
-      }
-      return renderAttrs(tkn)
-    }    
+    if (args.standalone) {
+      const bundle = await rollup({
+        input: "index",
+        plugins: [
+          virtual({
+            'index': meta['$script'],            
+          }),
+          includepaths({
+            include: {},
+            paths: [__dirname, '.'],
+            external: [],
+            extensions: ['.js']
+          })
+        ]
+      })      
+      const { output } = await bundle.generate({
+        file: 'dist/runtime/index.js',
+        format: 'iife'
+      });
+      meta['$script'] = output[0].code      
+    }     
 
-    md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
-      const token = tokens[idx];
-      return  '<pre' + slf.renderAttrs(token) + '>'
-        + '<code>' + token.content + '</code>'
-        + '</pre>';
-    }
-
-    meta['$body'] = md.render(markdown);           
     meta['$dir'] = "dist";
-    meta['$pagetitle'] = meta['sheet'] + (meta.i18n?.["sheet-title"] || ". Übungsblatt") + " - " + meta['title'] + " " + meta['subtitle'];
+
+    var pagetitle = "" 
+    if (meta['sheet'] !== undefined) pagetitle += meta['sheet'].toString() + (meta.i18n?.["sheet-title"] || ". Übungsblatt") + " - "
+    pagetitle += meta['title'] || "ublatt"
+    if (meta['subtitle']) pagetitle += " - " + meta['subtitle']
+    meta['$pagetitle'] = pagetitle;
+    const footerTemplateSrc = fs.readFileSync(__dirname + "/templates/submit.html").toString('utf-8')
+    const footerTemplate = handlebars.compile(footerTemplateSrc)
+
+    meta['$footer'] = footerTemplate(meta)
+
     const templateSrc = fs.readFileSync(args.template).toString('utf-8');
     const template = handlebars.compile(templateSrc)
+
     process.stdout.write(template(meta))    
   }).argv

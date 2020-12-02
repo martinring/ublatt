@@ -1,19 +1,20 @@
+export interface Modules<A> {
+    registerModule(name: string, module: A): void
+}
+
 export interface Author {
     name: string,
     matriculation_number: string,
     email: string
 }
 
-export type ExerciseType<T> = (elem: Element, name: string) => Exercise<T>
+export interface ExerciseType {
+    make(elem: Element, name: string): Exercise
+} 
 
-export interface Exercise<T> {
+export interface Exercise {
     get: () => any | undefined,
     set: (x: any) => void
-}
-
-export interface Metadata {
-    readonly sheet?: string;
-    readonly title?: string;
 }
 
 export interface Solution {
@@ -23,8 +24,7 @@ export interface Solution {
     solutions: { [id: string]: any; }
 }
 
-export interface Ublatt {
-    registerExerciseType<T>(name: string, constructor: ExerciseType<T>): void
+export interface Ublatt extends Modules<ExerciseType> {        
     addAuthor(): void
     removeAuthor(): void
     save(): void
