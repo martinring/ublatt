@@ -23,11 +23,24 @@ export interface InputMode {
   name: string
 }
 
-export default class Input implements ExerciseType, Modules<InputMode> {
+export default class Input implements ExerciseType<string>, Modules<InputMode> {
   private inputModes: { [id: string]: InputMode } = {}
 
   registerModule(name: string, mode: InputMode) {
     this.inputModes[name] = mode;
+  }
+
+  render(elem: Element, name: string, content: string): Element {    
+    let rendered = document.createElement('div');
+    rendered.classList.add('rendered','math')
+    let tpe = Object.keys(this.inputModes).find((x) => elem.classList.contains(x))
+    if (tpe) {
+      let inputMode = this.inputModes[tpe]
+      inputMode.render(content,rendered,name)
+    } else {
+      rendered.innerText = content 
+    }
+    return rendered
   }
 
   make(elem: Element, name: string) {
@@ -36,7 +49,7 @@ export default class Input implements ExerciseType, Modules<InputMode> {
     let tpe = Object.keys(this.inputModes).find((x) => elem.classList.contains(x))
     if (tpe) {
       let inputMode = this.inputModes[tpe]
-      elem.classList.add("rendered")
+      elem.classList.add("rendered")      
       let help = document.createElement('div')
       help.classList.add('help')
       help.dataset["name"] = tpe
@@ -45,13 +58,13 @@ export default class Input implements ExerciseType, Modules<InputMode> {
       link.innerHTML = inputMode.name
       link.href = inputMode.help
       help.appendChild(link)
-      elem.appendChild(help)
+      elem.appendChild(help)      
       let rendered = document.createElement("div");
       rendered.classList.add("rendered");
       let editorWrapper = document.createElement("div");
       editorWrapper.classList.add("editor");
-      elem.appendChild(rendered);
       elem.appendChild(editorWrapper);
+      elem.appendChild(rendered);
 
       const setup: Extension = [
         lineNumbers(),
@@ -123,49 +136,26 @@ export default class Input implements ExerciseType, Modules<InputMode> {
 
       let state = EditorState.create({
         doc: text,
-        extensions: [setup]
-      })      
+        extensions: [setup,inputMode.language]
+      })
+      
       let view = new EditorView({
         state: state,                
         parent: editorWrapper
       })
-
-      /*let editor = CodeMirror(editorWrapper, {
-        value: text,
-        mode: inputMode.language,
-        viewportMargin: Infinity
-      })*/
+            
       editorWrapper.addEventListener("transitionend", function () {
         if (elem.classList.contains("editing")) {
           view.focus()
-          view.update([])
         }
       });
-      //let errorMarker: TextMarker | null = null;
-      let timeout: number | null = null;
 
-      /*editor.on("change", (function () {
-        
-      }))*/
       elem.addEventListener("click", function () {
         {
           elem.classList.add("editing");
         }
-      })/*
-      editor.on('focus', function (e) {
-        {
-          elem.classList.add("editing");
-        }
-      })
-      try {
-        if (editor.getValue().trim().length > 0) {
-          inputMode.render(editor.getValue(), rendered, name);
-        }
-      } catch (e) {
-        editorWrapper.classList.add("error");
-        rendered.innerHTML = e.message;
-        rendered.classList.add("error");
-      }*/
+      })      
+
       return {
         get: () => view.state.sliceDoc(0),
         set: (v: string) => {

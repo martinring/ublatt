@@ -2,14 +2,17 @@
     "include": ["."],
     "compilerOptions": {
         "moduleResolution": "node",
-        "lib": ["ES6"],
-        "module": "ES6",
+        "lib": ["ES6","ESNext.String"],
+        "module": "ES2020",
         "esModuleInterop": true,
         "rootDir": ".",
-        "strict": true,    
-        "outDir": "../../dist/cli",
+        "strict": true,
+        "noEmit": true,
         "skipLibCheck": true
     },
+    "references": [
+        { "path": "../shared" }        
+    ],
     "typeAcquisition": {
         "enable": true
     }

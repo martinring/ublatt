@@ -4,7 +4,6 @@ import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import json from "@rollup/plugin-json";
 
-
 function makeModule(base) {
     return function(a) {
         const k = a[0]
@@ -13,7 +12,7 @@ function makeModule(base) {
         submodules.unshift({
             input: "src/runtime/modules" + base + '/' + k + ".ts",
             output: {
-                file: 'dist/runtime/modules' + base + '/' + k + '.js' ,
+                file: 'dist/modules' + base + '/' + k + '.js' ,
                 format: 'es'
             },
             plugins: [
@@ -32,7 +31,7 @@ const modules = Array.from(extractModules(__dirname + "/src/runtime/modules").en
 modules.unshift({
     input: "src/runtime/ublatt.ts",
     output: {
-        dir: 'dist/runtime',
+        dir: 'dist',
         format: 'es'
     },
     plugins: [

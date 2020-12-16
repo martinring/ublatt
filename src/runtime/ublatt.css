@@ -249,7 +249,6 @@ input[type=checkbox] + label::before, input[type=radio] + label::before {
   flex-shrink: 0;
   text-align: center;
   vertical-align: middle;
-  margin-right: -0.6rem;
 }
 
 input[type=radio] + label::before {
@@ -272,78 +271,6 @@ pre code {
   border-radius: 0.2rem;  
 }
 
-
-.combine {
-  display: grid;
-  grid-auto-flow: dense;
-  grid-auto-columns: 1fr;
-}
-
-.combine > .body {
-  grid-column: 1;
-  display: grid;
-  grid-template-columns: max-content auto;
-  align-self: flex-start;
-  width: 100%;
-}
-
-.combine > .body > .left {
-  grid-column: 1;
-  font-weight: bold;
-  text-align: right;
-  vertical-align: middle;
-  position: relative;
-  padding: 0 1rem;
-  position: relative;
-  border-bottom: 1px solid #ddd;
-}
-
-.combine > .body > .placeholder {
-  grid-column: 2;
-  border-bottom: 1px solid #ddd;
-}
-
-.combine > .body > .placeholder.drag-over {
-  background-color: #eee;
-}
-
-.combine > .options {
-  margin-left: 1rem;
-  grid-column: 2;
-}
-
-.combine > .options > ul {
-  display: flex;
-  flex-flow: column nowrap;
-  align-self: center;
-  padding: 0;
-  border: 0.05rem solid #ddd;
-  background: #f9f9f9;
-  position: relative;
-  list-style: none;
-}
-
-.combine > .options > ul:empty {
-  display: none;
-}
-
-.combine > .options > ul::before {
-  content: 'ℹ Ziehen Sie die Antworten mit der Maus an die richtige Stelle links.';
-  padding: 1rem 2rem;
-  text-align: center;
-  color: #999;
-}
-
-.combine > .options > ul > li {
-  cursor: default;
-  transition: background-color 0.3s ease;
-  padding: 0 2rem;
-  word-wrap: break-word;
-}
-
-.combine > .options > ul > li:hover {
-  background-color: rgba(0,0,0,0.03);
-}
 
 
 .code > .CodeMirror {
@@ -562,4 +489,67 @@ a:hover {
   display: inline-block;
   line-height: 2rem;
   vertical-align: middle;  
+}
+
+.assess {
+  font-family: 'TeX Gyre Pagella';
+  position: absolute;
+  right: -5rem;
+  width: 4rem;
+  top: 0;
+}
+
+.solution {
+  position: relative;
+  color: blue;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: stretch;
+}
+
+.solution > .submission {
+  min-width: calc(50% - 1rem);
+}
+
+.solution > .submission::before {
+  content: 'Eure Lösung:';
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.solution > .feedback::before {
+  content: 'Feedback:';
+  margin-bottom: 1rem;
+  display: block;  
+}
+
+.solution.fail > .submission {
+  color: red;
+}
+
+.solution .assess::before {
+  content: '✓';
+  font-size: 2rem;
+  color: green;
+}
+
+.solution .assess.fail::before {
+  content: '✗';
+  color: red;
+}
+
+.solution > .feedback {
+  color: blue;
+  display: none;
+}
+
+.solution.fail > .feedback {
+  display: block;
+}
+
+.solution > .submission {
+  color: green;
+  display: block;
 }

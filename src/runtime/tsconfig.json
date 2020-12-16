@@ -1,11 +1,14 @@
 {
     "compilerOptions": {
         "moduleResolution": "node",
-        "esModuleInterop": true,
+        "esModuleInterop": true,        
         "lib": ["dom","es6"],  
         "rootDir": ".",
-        "strict": true, 
+        "strict": true
     },
+    "references": [
+        { "path": "../shared" }
+    ],
     "typeAcquisition": {
         "enable": true
     }

@@ -36,8 +36,7 @@
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-.choice>ul>li>label, .choice>ol>li>label {
-    padding: 1rem 2rem;
+.choice>ul>li>label, .choice>ol>li>label {    
     display: flex;
     flex-flow: row nowrap;
     align-items: center;

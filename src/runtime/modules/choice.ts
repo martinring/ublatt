@@ -1,7 +1,11 @@
-import { ExerciseType } from "../Types";
+import { Exercise, ExerciseType } from "../Types";
 
-export default class Choice implements ExerciseType {
-  public make(elem: Element, name: string) {
+export default class Choice implements ExerciseType<boolean[] | boolean[][]> {
+  render(elem: Element, name: string, content: boolean[] | boolean[][]) {        
+    return document.createElement('div')
+}
+
+  public make(elem: Element, name: string): Exercise<boolean[] | boolean[][]> {
     let container = elem.children.item(0)
     if (container) {
       if (container.tagName == 'TABLE') {
@@ -48,7 +52,7 @@ export default class Choice implements ExerciseType {
         })
         return {
           get: () => groups.map((x) => x.get()),
-          set: (x: Array<Array<boolean>>) => x.forEach((x, i) => groups[i].set(x))
+          set: (x: boolean[] | boolean[][]) => x.forEach((x: boolean | boolean[], i: number) => groups[i].set(typeof x == "boolean" ? [x] : x))
         }
       } else {
         // coice list                                 
@@ -73,7 +77,9 @@ export default class Choice implements ExerciseType {
         })
         return {
           get: () => choices.map((x) => x.get()),
-          set: (x: Array<boolean>) => x.forEach((x, i) => choices[i].set(x))
+          set: (x: boolean[] | boolean[][]) => 
+            x.forEach((x: boolean | boolean[], i : number) => 
+              typeof x == "boolean" ? choices[i].set(x) : x.forEach((x,i) => choices[i].set(x)))
         }
       }
     } else {

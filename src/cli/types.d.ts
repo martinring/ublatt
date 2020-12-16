@@ -1,3 +1,9 @@
+declare module 'nomnoml' {
+    export default {
+        renderSvg(src: string): string
+    }
+}
+
 declare module 'markdown-it-texmath' {
     import { PluginWithOptions } from "markdown-it";
     const texmath: PluginWithOptions

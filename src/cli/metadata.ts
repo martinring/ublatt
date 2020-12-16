@@ -1,9 +1,25 @@
 import yaml from 'yaml';
+import * as fs from 'fs/promises';
+import { Author } from '../shared/Types';
 
 export type Metadata = {
   sheet?: string;
   title?: string;
+  lang?: string;
+  author?: Author[];
   [id: string]: any;
+}
+
+export function loadMetadata(path: string | string[]): Promise<Metadata> {
+  if (typeof path == "string") {
+    return fs.readFile(path).then(x => x.toString('utf-8')).then(yaml.parseDocument)
+  } else {
+    return path.map(loadMetadata).reduce(async (a,b) => {
+      const a_ = await a
+      const b_ = await b
+      return mergeMetadata(a_,b_)
+    })
+  }
 }
 
 export function parseMetadata(input: string): Metadata {

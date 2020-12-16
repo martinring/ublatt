@@ -1,3 +1,4 @@
+bin/fetch.py
 node_modules/
 dist/
 .vscode/

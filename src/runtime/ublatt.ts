@@ -1,12 +1,12 @@
 import { View } from './View';
-import { Exercise, Solution, ExerciseType, Author, Ublatt } from './Types';
+import { Exercise, Solution, ExerciseType, Author, Ublatt } from '../shared/Types';
 //import { Metadata } from '../shared/metadata';
 
 export default class Main implements Ublatt {
   private nosave: boolean = false;
 
-  private readonly exerciseTypes = new Map<string,ExerciseType>()
-  private readonly exercises: { [id: string]: Exercise } = { }
+  private readonly exerciseTypes = new Map<string,ExerciseType<any>>()
+  readonly exercises: { [id: string]: Exercise<any> } = { }
   private readonly authorTable: Element | undefined
   private authors: Array<View<Author>> = []
   private readonly sheet: Element
@@ -28,7 +28,7 @@ export default class Main implements Ublatt {
     matnrField.contentEditable = "true";
     matnrField.classList.add('field')
     matnrField.classList.add('matnr')
-    if (author) matnrField.innerText = author.matriculation_number
+    if (author) matnrField.innerText = author.matriculation_number || ""
     matnr.appendChild(matnrField);
     const email = document.createElement('td');
     const emailField = document.createElement('span');
@@ -49,7 +49,7 @@ export default class Main implements Ublatt {
       },
       set(x) {
         nameField.innerText = x.name
-        matnrField.innerText = x.matriculation_number
+        matnrField.innerText = x.matriculation_number || ""
         emailField.innerText = x.email
       }
     }
@@ -82,8 +82,7 @@ export default class Main implements Ublatt {
           email: ""
         })
       }    
-      value.authors.forEach((a,i) => {
-        console.log(a)
+      value.authors.forEach((a: Author,i: number) => {        
         let view = this.author(i + 1, a)
         if (this.authorTable) this.authorTable.appendChild(view.elem)
         this.authors.push(view)
@@ -101,27 +100,77 @@ export default class Main implements Ublatt {
     this.sheet = sheet    
     const at = sheet.querySelector("table#authors > tbody")
     if (!at) {
-      console.error("table with class authors was not found")
+      console.warn("table with class authors was not found")
     } else {
       this.authorTable = at
     }    
   }
 
-  init() {
+  init(submission?: Solution, solution?: Solution) {    
     if (this.exerciseTypes.size == 0) {
       console.warn("no exercise types were registerd before init")
       return
     }
-    let selector = Array.from(this.exerciseTypes.keys()).map((x) => "." + x).join(', ')
+    let selector = Array.from(this.exerciseTypes.keys()).map((x) => "." + x).join(', ')   
     var cnt = 1
+    if (submission && solution) {
+      document.querySelectorAll('div.info').forEach(x => x.remove())
+    }
     this.sheet.querySelectorAll('.main > section').forEach((section) => {
       let sec = 'e' + cnt++      
-      console.log(selector)
       section.querySelectorAll(selector).forEach((part,n) => {
           let tpe = Array.from(this.exerciseTypes.entries()).find(([x,t]) => part.classList.contains(x))
           if (tpe) {            
-            let name = n > 0 ? sec + '_' + (n + 1) : sec      
-            this.exercises[name] = tpe[1].make(part,name)
+            let name = n > 0 ? sec + '_' + (n + 1) : sec
+            if (!submission || !solution) {
+              this.exercises[name] = tpe[1].make(part,name)
+            } else {
+              let row = document.createElement('div')
+              row.classList.add('solution','fail')
+              let sub = document.createElement('div')
+              sub.classList.add('submission')
+              let feedback = document.createElement('div')
+              feedback.classList.add('feedback')
+              row.append(sub,feedback)
+
+              let x: Element
+              try {
+                x = tpe[1].render(part,name,submission.solutions[name])                
+              } catch(e) {
+                x = document.createElement('div')
+                x.textContent = "Kein Abgabe"
+                x.classList.add('rendered','fail')
+              }
+
+              let y: Element
+              try {
+                y = tpe[1].render(part,name,solution.solutions[name])                
+              } catch(e) {
+                y = document.createElement('div')
+                y.textContent = "Leider Falsch"
+                y.classList.add('rendered','fail')
+              }
+
+              sub.appendChild(x)              
+              sub.contentEditable = "true";
+              feedback.appendChild(y)            
+              feedback.contentEditable = "true";  
+              part.replaceWith(row)
+
+              const assess = document.createElement('div');              
+
+              assess.classList.add('assess','fail');
+              assess.addEventListener('click',() => {
+                if (assess.classList.contains('fail')) {
+                  assess.classList.remove('fail')
+                  row.classList.remove('fail')
+                } else {
+                  assess.classList.add('fail')
+                  row.classList.add('fail')
+                }
+              })
+              row.insertAdjacentElement("beforeend",assess)              
+            }
           }
       })
     })
@@ -154,7 +203,7 @@ export default class Main implements Ublatt {
     },false)
   }
 
-  public registerModule(name: string, module: ExerciseType) {    
+  public registerModule<T>(name: string, module: ExerciseType<T>) {    
     this.exerciseTypes.set(name, module)
   }
 
@@ -168,6 +217,13 @@ export default class Main implements Ublatt {
 
   public removeAuthor() {
     this.authors.pop()?.elem.remove()
+  }
+
+  public emailify() {
+    for (const script of Array.from(document.getElementsByTagName('script'))) {
+      script.remove()      
+    }
+    document.body.innerHTML = document.body.innerHTML;
   }
 
   public save() {

@@ -7,6 +7,7 @@ import attrs from 'markdown-it-attrs';
 import secs from 'markdown-it-header-sections';
 import Token from 'markdown-it/lib/token';
 import MarkdownIt from 'markdown-it';
+import nomnoml from 'nomnoml';
 
 export default class Markdown {    
     readonly md: MarkdownIt
@@ -45,15 +46,19 @@ export default class Markdown {
                 }
                 return renderAttrs(tkn)
             }
-        }
+        } 
 
         this.md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
             const token = tokens[idx];
-            return '<pre' + slf.renderAttrs(token) + '>'
-                + '<code>' + token.content + '</code>'
-                + '</pre>';
+            token.attrJoin('class',token.info)
+            if (token.attrGet('class') == "nomnoml") {
+                return nomnoml.renderSvg(token.content)
+            } else {
+                return '<pre' + slf.renderAttrs(token) + '>'
+                    + '<code>' + token.content + '</code>'
+                    + '</pre>';
+            }
         }
-
     }
 
     public render(input: string): string {

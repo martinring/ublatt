@@ -4,11 +4,6 @@ import { InputMode } from '../input';
 MermaidAPI.initialize({
   startOnLoad: false,
   theme: "default",
-  /*themeVariables: {
-    fontFamily: '"Palatino Linotype", "Book Antiqua", Palatino, serif',  
-    primaryColor: '#ffffff',
-    primaryBorderColor: '#000000'
-  }*/
 })
 
 export default class Mermaid implements InputMode {

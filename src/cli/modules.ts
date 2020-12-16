@@ -1,12 +1,10 @@
-import { existsSync, lstatSync, readdirSync }  from 'fs';
+import { existsSync, lstatSync, readdirSync, PathLike }  from 'fs';
 import { parse } from 'path';
 
-/**
- * @typedef { Map<string,{ css: boolean, submodules: Modules } } Modules 
- */
+export type Module = { css: boolean, submodules: Modules }
+export type Modules = Map<string,Module>
 
-/** @return { Modules }  */
-function extractModules(base) {    
+export default function extractModules(base: PathLike): Modules {    
     let result = new Map()  
     if (existsSync(base) && lstatSync(base).isDirectory) {
         readdirSync(base).forEach((file) => {
@@ -22,5 +20,3 @@ function extractModules(base) {
     }
     return result
 }
-
-export default extractModules

@@ -19,8 +19,11 @@
     }    
   </style>  
 {{#each $css}}
-  <link rel="stylesheet" href="{{this}}"/>
+  {{{this}}}
 {{/each}}
+<script type="module">
+  {{{$script}}}
+</script>
 </head>
 <body>
 <form class="ublatt">
@@ -53,8 +56,5 @@
 {{{$footer}}}
 {{/if}}
 </form>
-<script type="module">
-  {{{$script}}}
-</script>
 </body>
 </html>

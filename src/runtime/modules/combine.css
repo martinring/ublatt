@@ -1,0 +1,75 @@
+.combine>hr{
+    display: none;
+}
+
+.combine {
+    display: grid;
+    grid-auto-flow: dense;
+    grid-auto-columns: 1fr;    
+    column-gap: 1em;
+}
+
+.combine>ul:first-child {
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: max-content auto;
+    align-self: flex-start;    
+}
+
+.combine>ul:first-child>.left {
+    grid-column: 1;
+    font-weight: bold;
+    text-align: right;
+    vertical-align: middle;
+    position: relative;
+    padding: 0 1rem;
+    position: relative;
+    border-bottom: 1px solid #ddd;
+    list-style: none;
+}
+
+.combine>ul:first-child>.placeholder {
+    grid-column: 2;
+    border-bottom: 1px solid #ddd;
+    list-style: none;
+}
+
+.combine>ul:first-child>.placeholder.drag-over {
+    background-color: #eee;
+}
+
+.combine>ul:last-child {
+    margin-left: 1rem;
+    grid-column: 2;
+    display: flex;
+    flex-flow: column nowrap;
+    align-self: center;
+    padding: 0;
+    border: 0.05rem solid #ddd;
+    background: #f9f9f9;
+    position: relative;
+    list-style: none;
+}
+
+.combine>ul:last-child.empty {
+    display: none;
+}
+
+.combine>ul:last-child::before {
+    content: 'ℹ Ziehen Sie die Antworten mit der Maus an die richtige Stelle links.';
+    padding: 1rem 2rem;
+    text-align: center;
+    color: #999;
+}
+
+.combine>ul:last-child>li {
+    cursor: default;
+    user-select: none;
+    transition: background-color 0.3s ease;
+    padding: 0 2rem;
+    word-wrap: break-word;
+}
+
+.combine>ul:last-child>li:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
