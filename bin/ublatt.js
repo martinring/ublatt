@@ -9,12 +9,12 @@ import yargs2 from "yargs";
 
 // src/cli/build.ts
 import {
-  existsSync as existsSync2,
-  readFileSync,
+  existsSync as existsSync3,
+  readFileSync as readFileSync2,
   writeFileSync
 } from "fs";
 import {
-  parse as parse2
+  parse as parse3
 } from "path";
 
 // src/cli/metadata.ts
@@ -99,8 +99,15 @@ import bspans from "markdown-it-bracketed-spans";
 import attrs from "markdown-it-attrs";
 import secs from "markdown-it-header-sections";
 import nomnoml2 from "nomnoml";
+import {
+  existsSync as existsSync2,
+  readFileSync
+} from "fs";
+import {
+  parse as parse2
+} from "path";
 class Markdown {
-  constructor(processClasses) {
+  constructor(dir, processClasses) {
     this.md = markdownit().use(container, "classes", {
       validate(params) {
         return params.trim().match(/^(\w+\s+)*\w+$/);
@@ -129,6 +136,18 @@ class Markdown {
         return renderAttrs(tkn);
       };
     }
+    this.md.renderer.rules.image = function(tokens, idx, options, env, slf) {
+      const token = tokens[idx];
+      let src = token.attrGet("src");
+      if (src && existsSync2(dir + "/" + src)) {
+        const mime = "image/" + parse2(src).ext.slice(1);
+        const uri = `data:${mime};base64,${readFileSync(dir + "/" + src).toString("base64")}`;
+        token.attrSet("src", uri);
+      } else {
+        console.warn(src + " does not exist");
+      }
+      return slf.renderToken(tokens, idx, options);
+    };
     this.md.renderer.rules.fence = function(tokens, idx, options, env, slf) {
       const token = tokens[idx];
       token.attrJoin("class", token.info);
@@ -148,14 +167,15 @@ class Markdown {
 import esbuild2 from "esbuild";
 import handlebars2 from "handlebars";
 function build(options) {
-  const f = readFileSync(options.source == "stdin" ? 0 : options.source).toString("utf-8");
+  const dir = options.source == "stdin" ? "." : parse3(options.source).dir;
+  const f = readFileSync2(options.source == "stdin" ? 0 : options.source).toString("utf-8");
   const modules2 = extractModules(options.dataDir + "/src/runtime/modules");
   const meta = {
     lang: Intl.DateTimeFormat().resolvedOptions().locale.split("-")[0]
   };
   if (options.meta) {
     options.meta.forEach((x) => {
-      const src = readFileSync(x).toString("utf-8");
+      const src = readFileSync2(x).toString("utf-8");
       const m = parseMetadata(src);
       mergeMetadata(m, meta);
     });
@@ -190,17 +210,17 @@ function build(options) {
       });
     }
   }
-  const md = new Markdown((x) => findModules("./src/runtime/modules", modules2, x, "ublatt"));
+  const md = new Markdown(dir, (x) => findModules("./src/runtime/modules", modules2, x, "ublatt"));
   meta["$body"] = md.render(markdown2);
   const initArgs = [];
   if (options.submission) {
-    let submission = readFileSync(options.submission).toString("utf-8");
+    let submission = readFileSync2(options.submission).toString("utf-8");
     const sub = JSON.parse(submission);
     meta["author"] = sub.authors.map((a) => a.name);
     initArgs.push(submission);
   }
   if (options.solution) {
-    let solution = readFileSync(options.solution).toString("utf-8");
+    let solution = readFileSync2(options.solution).toString("utf-8");
     JSON.parse(solution);
     initArgs.push(solution);
   }
@@ -223,16 +243,16 @@ function build(options) {
   }
   meta["$css"] = meta["$css"].map((x) => {
     let alt = x.replace("./src/runtime", "./dist");
-    if (existsSync2(alt))
+    if (existsSync3(options.dataDir + "/" + alt))
       x = alt;
     console.log(x);
     if (options.standalone) {
       const p = options.dataDir + "/" + x;
-      let css = readFileSync(p).toString("utf-8");
+      let css = readFileSync2(p).toString("utf-8");
       css = css.replaceAll(/url\(['"]?([a-zA-Z\.\/0-9_@-]+)['"]?\)/g, (x2, y) => {
-        const data = readFileSync(parse2(p).dir + "/" + y).toString("base64");
+        const data = readFileSync2(parse3(p).dir + "/" + y).toString("base64");
         let mime;
-        switch (parse2(y).ext) {
+        switch (parse3(y).ext) {
           case ".woff":
             mime = "font/woff";
             break;
@@ -265,11 +285,11 @@ ${css}
   if (meta["subtitle"])
     pagetitle += " - " + meta["subtitle"];
   meta["$pagetitle"] = pagetitle;
-  const footerTemplateSrc = readFileSync(options.dataDir + "/templates/submit.html").toString("utf-8");
+  const footerTemplateSrc = readFileSync2(options.dataDir + "/templates/submit.html").toString("utf-8");
   const footerTemplate = handlebars2.compile(footerTemplateSrc);
   if (!options.submission)
     meta["$footer"] = footerTemplate(meta);
-  const templateSrc = readFileSync(options.dataDir + "/templates/ublatt.html").toString("utf-8");
+  const templateSrc = readFileSync2(options.dataDir + "/templates/ublatt.html").toString("utf-8");
   const template = handlebars2.compile(templateSrc);
   if (options.out == "stdout") {
     process.stdout.write(template(meta));
@@ -280,19 +300,19 @@ ${css}
 
 // src/cli/summary.ts
 import {
-  readFileSync as readFileSync2,
+  readFileSync as readFileSync3,
   readdirSync as readdirSync2
 } from "fs";
 import {
-  parse as parse3
+  parse as parse4
 } from "path";
 function summary(options) {
   let course = null;
   const sheets = {};
   const students = {};
   const handins = {};
-  readdirSync2(options.dir).filter((x) => parse3(x).ext == ".json").map((x) => {
-    const src = readFileSync2(options.dir + x).toString("utf-8");
+  readdirSync2(options.dir).filter((x) => parse4(x).ext == ".json").map((x) => {
+    const src = readFileSync3(options.dir + x).toString("utf-8");
     const obj = JSON.parse(src);
     if (course == null) {
       course = obj.course;

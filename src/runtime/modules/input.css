@@ -58,7 +58,7 @@
     margin-bottom: 0;
 }
 
-.input>.editor {
+.input.rendered>.editor {
     position: absolute;
     top: 100%;
     left: 0;

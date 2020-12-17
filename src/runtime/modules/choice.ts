@@ -1,4 +1,4 @@
-import { Exercise, ExerciseType } from "../Types";
+import { Exercise, ExerciseType } from "../../shared/Types";
 
 export default class Choice implements ExerciseType<boolean[] | boolean[][]> {
   render(elem: Element, name: string, content: boolean[] | boolean[][]) {        

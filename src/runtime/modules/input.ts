@@ -1,4 +1,4 @@
-import { ExerciseType, Modules } from '../Types';
+import { ExerciseType, Modules } from '../../shared/Types';
 
 import {keymap, highlightSpecialChars, drawSelection, indentOnInput, ViewPlugin, ViewUpdate, EditorView} from "@codemirror/next/view"
 import {Extension, EditorState} from "@codemirror/next/state"
@@ -17,10 +17,10 @@ import {defaultHighlighter} from "@codemirror/next/highlight"
 import {lintKeymap} from "@codemirror/next/lint"
 
 export interface InputMode {
-  render(code: string, elem: HTMLElement, name: string): void
+  render?(code: string, elem: HTMLElement, name: string): void
   language: Extension
-  help: string
-  name: string
+  help?: string
+  name?: string
 }
 
 export default class Input implements ExerciseType<string>, Modules<InputMode> {
@@ -34,8 +34,8 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
     let rendered = document.createElement('div');
     rendered.classList.add('rendered','math')
     let tpe = Object.keys(this.inputModes).find((x) => elem.classList.contains(x))
-    if (tpe) {
-      let inputMode = this.inputModes[tpe]
+    let inputMode = tpe ? this.inputModes[tpe] : undefined
+    if (inputMode && inputMode.render) {      
       inputMode.render(content,rendered,name)
     } else {
       rendered.innerText = content 
@@ -47,26 +47,21 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
     let text = elem.textContent?.trim()
     elem.innerHTML = ""
     let tpe = Object.keys(this.inputModes).find((x) => elem.classList.contains(x))
-    if (tpe) {
-      let inputMode = this.inputModes[tpe]
-      elem.classList.add("rendered")      
-      let help = document.createElement('div')
-      help.classList.add('help')
-      help.dataset["name"] = tpe
-      let link = document.createElement('a')
-      link.target = '_blank'
-      link.innerHTML = inputMode.name
-      link.href = inputMode.help
-      help.appendChild(link)
-      elem.appendChild(help)      
-      let rendered = document.createElement("div");
-      rendered.classList.add("rendered");
-      let editorWrapper = document.createElement("div");
-      editorWrapper.classList.add("editor");
-      elem.appendChild(editorWrapper);
-      elem.appendChild(rendered);
+    let inputMode = tpe ? this.inputModes[tpe] : undefined
+    if (inputMode) {  
+      if (inputMode.name) {          
+        let help = document.createElement('div')
+        help.classList.add('help')
+        help.dataset["name"] = tpe      
+        let link = document.createElement('a')
+        link.target = '_blank'
+        link.innerHTML = inputMode.name
+        if (inputMode.help) link.href = inputMode.help
+        help.appendChild(link)
+        elem.appendChild(help)
+      }
 
-      const setup: Extension = [
+      let setup: Extension = [
         lineNumbers(),
         highlightSpecialChars(),
         history(),
@@ -96,10 +91,19 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
           ...gotoLineKeymap,
           ...completionKeymap,
           ...lintKeymap
-        ]),
-        ViewPlugin.fromClass(class {
-          timeout?: number           
-          constructor(view: EditorView) {  }          
+        ])        
+      ]
+
+      if (inputMode.render) {
+        let render = inputMode.render
+        elem.classList.add("rendered")
+        let rendered = document.createElement("div");
+        rendered.classList.add("rendered");
+        elem.appendChild(rendered);
+        setup = [setup, ViewPlugin.fromClass(class {
+          timeout?: number
+          view: EditorView
+          constructor(view: EditorView) { this.view = view }          
           update(update: ViewUpdate) {
             if (update.docChanged) {
               if (this.timeout) window.clearTimeout(this.timeout);
@@ -108,10 +112,10 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
                 //errorMarker = null;
                 let before = rendered.innerHTML;
                 try {
-                  view.composing
+                  this.view.composing
                   const text = update.state.sliceDoc(0)
                   if (text.trim().length > 0) {
-                    inputMode.render(text, rendered, name);
+                    render(text, rendered, name);
                   } else {
                     rendered.innerHTML = "";
                   }
@@ -131,8 +135,11 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
                 }
             }
           }
-        })
-      ]
+        })]
+      }
+      let editorWrapper = document.createElement("div");
+      editorWrapper.classList.add("editor");
+      elem.appendChild(editorWrapper);      
 
       let state = EditorState.create({
         doc: text,
@@ -140,21 +147,23 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
       })
       
       let view = new EditorView({
-        state: state,                
+        state: state,
         parent: editorWrapper
       })
             
-      editorWrapper.addEventListener("transitionend", function () {
-        if (elem.classList.contains("editing")) {
-          view.focus()
-        }
-      });
+      if (inputMode.render) {
+        editorWrapper.addEventListener("transitionend", function () {
+          if (elem.classList.contains("editing")) {
+            view.focus()
+          }
+        });
 
-      elem.addEventListener("click", function () {
-        {
-          elem.classList.add("editing");
-        }
-      })      
+        elem.addEventListener("click", function () {
+          {
+            elem.classList.add("editing");
+          }
+        })      
+      }
 
       return {
         get: () => view.state.sliceDoc(0),

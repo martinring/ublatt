@@ -179,6 +179,8 @@ export default class Main implements Ublatt {
     if (partial) {
       this.read(JSON.parse(partial))
     } else this.read({
+      course: "",
+      sheet: "",
       authors: [],
       solutions: {}
     })

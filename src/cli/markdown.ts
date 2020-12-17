@@ -8,11 +8,13 @@ import secs from 'markdown-it-header-sections';
 import Token from 'markdown-it/lib/token';
 import MarkdownIt from 'markdown-it';
 import nomnoml from 'nomnoml';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export default class Markdown {    
     readonly md: MarkdownIt
 
-    constructor(processClasses?: (classes: string[]) => void) {
+    constructor(dir: string, processClasses?: (classes: string[]) => void) {
         this.md = markdownit().use(container, 'classes', {
             validate(params: string) {
                 return params.trim().match(/^(\w+\s+)*\w+$/)
@@ -47,6 +49,19 @@ export default class Markdown {
                 return renderAttrs(tkn)
             }
         } 
+
+        this.md.renderer.rules.image = function (tokens, idx, options, env, slf) {
+            const token = tokens[idx];
+            let src = token.attrGet('src')            
+            if (src && fs.existsSync(dir + '/' + src)) {
+                const mime = 'image/' + path.parse(src).ext.slice(1)
+                const uri = `data:${mime};base64,${fs.readFileSync(dir + '/' + src).toString('base64')}`
+                token.attrSet('src', uri)
+            } else {
+                console.warn(src + " does not exist")
+            }
+            return slf.renderToken(tokens,idx,options)
+        }
 
         this.md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
             const token = tokens[idx];

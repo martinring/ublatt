@@ -17,7 +17,8 @@ type BuildOptions = {
   dataDir: string
 }
 
-export default function build(options: BuildOptions) {    
+export default function build(options: BuildOptions) {
+    const dir = options.source == 'stdin' ? '.' : path.parse(options.source).dir
     const f = fs.readFileSync(options.source == 'stdin' ? 0 : options.source).toString('utf-8');
 
     const modules = extractModules(options.dataDir + '/src/runtime/modules');        
@@ -70,7 +71,7 @@ export default function build(options: BuildOptions) {
       }
     }
 
-    const md = new Markdown(x => findModules("./src/runtime/modules",modules,x,"ublatt"))
+    const md = new Markdown(dir, x => findModules("./src/runtime/modules",modules,x,"ublatt"))
     meta['$body'] = md.render(markdown);
     
     const initArgs = []
@@ -108,7 +109,7 @@ export default function build(options: BuildOptions) {
 
     meta['$css'] = meta['$css'].map((x: string) => {
       let alt = x.replace('./src/runtime','./dist')      
-      if (fs.existsSync(alt)) x = alt
+      if (fs.existsSync(options.dataDir + '/' + alt)) x = alt
       console.log(x)
       if (options.standalone) {
         const p = options.dataDir + '/' + x
