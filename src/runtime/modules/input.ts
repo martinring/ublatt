@@ -77,20 +77,17 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
         inputMode.highlight || (() => {}),
         Object.assign({},defaultCodeJarOptions,inputMode.language)        
       )
+      
 
       editorWrapper.addEventListener('blur',() => elem.classList.remove('editing'))
-      editorWrapper.addEventListener('focus',() => elem.classList.add('editing'))
+      editorWrapper.addEventListener('focus',() => elem.classList.add('editing'))                      
 
-
-      let timeout: undefined | number
+      let set = (text: string) => view.updateCode(text)      
 
       if (inputMode.render) {
-        let render = inputMode.render
-        elem.classList.add("rendered")
-        let rendered = document.createElement("div");
-        rendered.classList.add("rendered");
-        elem.appendChild(rendered);
-        view.onUpdate((text) => {
+        let timeout: undefined | number
+
+        const updateRendered = function(text: string) {
           if (timeout) window.clearTimeout(timeout);
           timeout = undefined;
           //if (errorMarker) errorMarker.clear();
@@ -117,7 +114,19 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
             else
               timeout = window.setTimeout(show, 1000);
           }
-        })     
+        }
+        let render = inputMode.render
+        elem.classList.add("rendered")
+        let rendered = document.createElement("div");
+        rendered.classList.add("rendered");
+        elem.appendChild(rendered);
+        view.onUpdate((text) => {      
+          updateRendered(text)    
+        })
+        set = (text) => {
+          view.updateCode(text)
+          updateRendered(text)
+        }
         editorWrapper.addEventListener("transitionend", function () {
           if (elem.classList.contains("editing")) {
             editorWrapper.focus()
@@ -129,14 +138,14 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
           }
         })   
       }
-     
-      view.updateCode(text || "")
+          
+      set(text || "")
+
+      elem.dispatchEvent(new Event('keyup',{}))
 
       return {
         get: () => view.toString(),
-        set: (v: string) => {
-          if (v != view.toString()) view.updateCode(v)
-        }
+        set
       }
     } else {
       elem.classList.add("default")
