@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { dirname } from 'path';
 import esbuild from 'esbuild';
 import { readdirSync } from 'fs';
 

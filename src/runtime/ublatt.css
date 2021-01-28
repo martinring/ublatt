@@ -1,13 +1,8 @@
-@import url("../../node_modules/katex/dist/katex.css");
-@import url("../../node_modules/typeface-jetbrains-mono/dist/index.css");
-@import url("../../node_modules/typeface-tex-gyre-pagella/index.css");
-@import url("../../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css");
-@import url("../../node_modules/@fortawesome/fontawesome-free/css/solid.css");
-
-i {
-  font-family: font-awesome;
-  font-style: normal;
-}
+@import url('https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('http://fonts.cdnfonts.com/css/tex-gyre-pagella');
+@import url('./icons/icons.css');
+@import url('./prism.css');
 
 body {
   background-color: #fff;
@@ -30,28 +25,32 @@ form.ublatt > .main > section > ol > li:before {
   left: -1.6em;
 }
 
-form.ublatt {
+body:not(.email) form.ublatt {
   background-color: #fff;
   display: block;
   margin: auto;
   width: 55rem;
-  box-shadow: 0.1rem 0.1rem 1rem #ddd;
-  padding: 2rem 3rem;
-  margin: 2rem auto;
-  font-family: 'TeX Gyre Pagella';
+  box-shadow: 0.1rem 0.1rem 1rem #ddd;  
+  margin: 2rem auto;  
   counter-reset: figure;
+  padding: 2rem 3rem;
 }
 
-form.ublatt::before {
+form.ublatt {
+  font-family: 'TeXGyrePagella', sans-serif;
+}
+
+body:not(.email) form.ublatt::before {
   display: block;
   height: 5rem;
   content: '';
-  background-image: url("logo.png");
+  background-image: url("images/logo.svg");
   background-size: auto 2.7rem;
   background-position: 3rem 1rem;
   background-repeat: no-repeat;
   border-bottom: 0.0667rem solid black;
 }
+
 form.ublatt .head {
   margin: 1rem 3rem 3rem 3rem;
   display: grid;
@@ -93,9 +92,6 @@ form.ublatt .head .sheetnum {
   font-weight: 900;
   margin: 1rem 0 0.5rem 0;
 }
-form.ublatt .head .sheetnum:after {
-  content: '. ' var(--sheet-title,'Übungsblatt')
-}
 
 form.ublatt .head .issued, form.ublatt .head .due {
   grid-column: left2;
@@ -111,23 +107,22 @@ form.ublatt .head .due {
   grid-row: 4;
 }
 
-form.ublatt .head::before, form.ublatt .head::after {
+form.ublatt .issued-title, form.ublatt .due-title {
   font-size: 1.2rem;
   line-height: 1.2;
   grid-column: left;
   font-weight: bold;
   padding-right: 1em;
 }
-form.ublatt .head::before {
+form.ublatt .issued-title {
   grid-row: 3;
-  content: var(--issued, 'Ausgabe') ': ';
 }
-form.ublatt .head::after {
+
+form.ublatt .due-title {
   grid-row: 4;
-  display: var(--due-display, none);
-  content: var(--due, 'Abgabe') ': ';  
 }
-form.ublatt .main {
+
+form.ublatt .main, form.ublatt .greet {
   margin: 1em 3rem;
 }
 form.ublatt .math.display {
@@ -164,7 +159,7 @@ form.ublatt textarea {
 }
 .CodeMirror {
   height: auto;
-  font-family: "JetBrains Mono";
+  font-family: "JetBrains Mono", "Fira Code", "Monaco", "Consolas", monospace;
 }
 table {
   margin: auto;
@@ -191,9 +186,7 @@ form.ublatt > .main {
   counter-reset: h1
 }
 
-form.ublatt > .main > section > h1:before {
-    counter-increment: h1;
-    content: var(--sheet-num) '.' counter(h1);
+form.ublatt > .main > section > h1 > .secnum {
     font-size: 1.44rem;
     display: inline-block;
     border: 0.0667rem solid black;
@@ -207,6 +200,22 @@ form.ublatt > .main > section > h1:first-child {
   font-size: 1.44rem;
   font-weight: normal;
   font-style: italic;
+}
+
+form.ublatt > .main > .points {
+  color: blue;
+  font-size: 1.44rem;
+  font-weight: normal;
+  font-style: normal;
+  text-align: center;
+}
+
+form.ublatt > .main > section > h1:first-child > .points {
+  float: right;
+  color: blue;
+  font-weight: normal;
+  font-style: normal;
+  text-align: center;
 }
 
 .figure {
@@ -264,6 +273,7 @@ code {
 }
 
 pre code {
+  font-size: 0.8rem;
   display: block;
   padding: 1rem 2rem !important;
   border: 0.05rem solid #ddd;
@@ -416,16 +426,6 @@ code span.wa { /* Warning */
   padding-left: 2rem;  
 }
 
-.submit button {
-  width: 4rem;
-  height: 4rem;
-}
-
-.submit button img {
-  width: 3rem;
-  height: 3rem;
-}
-
 .buttons {
   display: flex;
   flex-flow: row;
@@ -436,6 +436,14 @@ code span.wa { /* Warning */
   text-align: left;
   line-height: 1.5rem;
   white-space: nowrap;
+}
+
+.submit table.authors th, .submit table.authors td {
+  padding: .25rem 0 .25rem .5rem;
+}
+
+.submit table.authors th:last-child, .submit table.authors td:last-child {
+  padding: .25rem 0.5rem;
 }
 
 a {
@@ -449,10 +457,8 @@ a:hover {
 .submit .field {
   text-align: left;
   font-size: 1rem;
-  display: block;
-  background: none;
-  border: 1px solid #eee;
-  font-family: 'TeX Gyre Pagella';
+  display: block;  
+  font-family: 'TeXGyrePagella' sans-serif;
   width: auto;
 }
 
@@ -473,14 +479,8 @@ a:hover {
   text-align: center;
 }
 
-.icon > i {
-  width: 1rem;
-  height: 1rem;
-}
-
 .icon.large > i {
-  width: 2rem;
-  height: 2rem;
+  font-size: 2rem;
   vertical-align: middle;
   margin-right: 0.2rem;
 }
@@ -492,7 +492,7 @@ a:hover {
 }
 
 .assess {
-  font-family: 'TeX Gyre Pagella';
+  font-family: 'TeXGyrePagella', sans-serif;
   position: absolute;
   right: -5rem;
   width: 4rem;
@@ -507,49 +507,52 @@ a:hover {
   flex-wrap: wrap;
   gap: 1rem 2rem;
   justify-content: stretch;
+  border: 1px solid #eee;
 }
 
-.solution > .submission {
-  min-width: calc(50% - 1rem);
-}
-
-.solution > .submission::before {
-  content: 'Eure Lösung:';
-  margin-bottom: 1rem;
-  display: block;
-}
-
-.solution > .feedback::before {
-  content: 'Feedback:';
-  margin-bottom: 1rem;
-  display: block;  
+.solution > .submission {  
+  padding: 1rem 2rem;
+  flex: 1;
 }
 
 .solution.fail > .submission {
-  color: red;
+  color: green;
 }
 
-.solution .assess::before {
-  content: '✓';
+.solution.warn > .submission {
+  color: green;
+}
+
+.solution .assess .icon {  
   font-size: 2rem;
   color: green;
 }
 
-.solution .assess.fail::before {
-  content: '✗';
+.solution .assess.fail .icon {  
   color: red;
+}
+
+.solution .assess.warn .icon {  
+  color: darkorange;
 }
 
 .solution > .feedback {
   color: blue;
-  display: none;
+  display: none;  
+  padding: 1rem 2rem;
+  background-color: #eef;
+  flex: 1;
 }
 
-.solution.fail > .feedback {
+.solution.fail > .feedback, .solution.warn > .feedback {
   display: block;
 }
 
 .solution > .submission {
   color: green;
   display: block;
+}
+
+.solution > .submission .mute, .solution > .feedback .mute {
+  color: gray;
 }

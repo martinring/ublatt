@@ -17,23 +17,30 @@ export default function summary(options: SummaryOptions) {
       if (course == null) {
         course = obj.course
       } else if (course != obj.course) {
-        console.error(`found submissions to multiple courses (${course} and ${obj.course})`)
+        console.error(`- found submissions to multiple courses (${course} and ${obj.course})`)
       }
       obj.authors.forEach(a => {        
         students[a.matriculation_number] = students[a.matriculation_number] || a
         if (!handins[a.matriculation_number]) handins[a.matriculation_number] = {}
         if (handins[a.matriculation_number][obj.sheet])
-          console.warn(`multiple submissions for sheet ${obj.sheet} from ${a.name} (${a.matriculation_number})`)
+          console.warn(`- multiple submissions for sheet ${obj.sheet} from ${a.name} (${a.matriculation_number})`)
         else
           handins[a.matriculation_number][obj.sheet] = obj
       })
       if (!sheets[obj.sheet]) sheets[obj.sheet] = []
       sheets[obj.sheet].push(obj)
     })
-    Object.entries(students).forEach(([x,y]) => {
-      console.log(`${y.name} (${x}): ${Object.keys(handins[y.matriculation_number]).join(", ")}`)
-    })
+    console.log("## Sheets\n")
     Object.entries(sheets).forEach(([x,y]) => {
-      console.log(`sheet ${x}: ${y.length} handins from ${y.map(x => x.authors.length).reduce((x,y) => x + y)} students`)
+      console.log(`- sheet ${x}: ${y.length} handins from ${y.map(x => x.authors.length).reduce((x,y) => x + y)} students`)
+    })    
+    console.log("\n## Missing handins\n")
+    Object.entries(students).forEach(([x,y]) => {
+      const e = handins[y.matriculation_number]
+      const missing = Object.keys(sheets).filter(x => e[x] === undefined)    
+      if (missing.length > 0) 
+        console.log(`- ${y.name} (${x}): ${missing.join(", ")}`)
     })
+    console.log("\n")
+    
 }

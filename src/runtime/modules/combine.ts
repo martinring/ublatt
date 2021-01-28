@@ -1,11 +1,11 @@
-import { Exercise, ExerciseType } from '../Types';
+import { Exercise, ExerciseType, Eval } from '../Types';
 
 export default class Combine implements ExerciseType<number[]> {
-    render(elem: Element, name: string, content: number[]) {        
-        return document.createElement('div')
+    public eval(elem: Element, name: string, value: Eval<number[]>): Element {        
+        throw new Error('not implemented')
     }
 
-    make(elem: Element, name: string): Exercise<number[]> {
+    public make(elem: Element, name: string): Exercise<number[]> {
         let lefts = Array.from(elem.querySelectorAll<HTMLLIElement>('ul:first-child>li')).map(left => {
             left.classList.add('left')
             let placeholder = document.createElement('li')

@@ -7,21 +7,26 @@ import attrs from 'markdown-it-attrs';
 import secs from 'markdown-it-header-sections';
 import Token from 'markdown-it/lib/token';
 import MarkdownIt from 'markdown-it';
-import nomnoml from 'nomnoml';
 import * as fs from 'fs';
 import * as path from 'path';
+
+interface MarkdownOptions {
+    dir: string,
+    processClasses?: (classes: string[]) => void,
+    standalone?: boolean
+}
 
 export default class Markdown {    
     readonly md: MarkdownIt
 
-    constructor(dir: string, processClasses?: (classes: string[]) => void) {
+    constructor(options: MarkdownOptions) {
         this.md = markdownit().use(container, 'classes', {
             validate(params: string) {
                 return params.trim().match(/^(\w+\s+)*\w+$/)
             },
             render(tokens: Token[], idx: number) {
                 const classes = tokens[idx].info.trim().split(/\s+/)
-                processClasses?.(classes)
+                options.processClasses?.(classes)
                 if (tokens[idx].nesting === 1) {
                     // opening tag
                     return `<div class="${classes.join(' ')}">\n`;
@@ -36,7 +41,8 @@ export default class Markdown {
             .use(attrs)
             .use(secs)
 
-        if (processClasses) {
+        if (options.processClasses) {
+            const processClasses = options.processClasses
             const renderAttrs = this.md.renderer.renderAttrs
             this.md.renderer.renderAttrs = function (tkn) {
                 if (tkn.attrs) {
@@ -50,29 +56,25 @@ export default class Markdown {
             }
         } 
 
-        this.md.renderer.rules.image = function (tokens, idx, options, env, slf) {
+        this.md.renderer.rules.image = function (tokens, idx, opts, env, slf) {
             const token = tokens[idx];
             let src = token.attrGet('src')            
-            if (src && fs.existsSync(dir + '/' + src)) {
+            if (src && fs.existsSync(options.dir + '/' + src)) {
                 const mime = 'image/' + path.parse(src).ext.slice(1)
-                const uri = `data:${mime};base64,${fs.readFileSync(dir + '/' + src).toString('base64')}`
+                const uri = `data:${mime};base64,${fs.readFileSync(options.dir + '/' + src).toString('base64')}`
                 token.attrSet('src', uri)
             } else {
                 console.warn(src + " does not exist")
             }
-            return slf.renderToken(tokens,idx,options)
+            return slf.renderToken(tokens,idx,opts)
         }
 
         this.md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
             const token = tokens[idx];
-            token.attrJoin('class',token.info)
-            if (token.attrGet('class') == "nomnoml") {
-                return nomnoml.renderSvg(token.content)
-            } else {
-                return '<pre' + slf.renderAttrs(token) + '>'
-                    + '<code>' + token.content + '</code>'
-                    + '</pre>';
-            }
+            token.attrJoin('class',token.info)            
+            return '<pre' + slf.renderAttrs(token) + '>'
+                + '<code>' + token.content + '</code>'
+                + '</pre>';            
         }
     }
 

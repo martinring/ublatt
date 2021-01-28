@@ -8,7 +8,8 @@
         "rootDir": ".",
         "strict": true,
         "noEmit": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "resolveJsonModule": true
     },
     "references": [
         { "path": "../shared" }        

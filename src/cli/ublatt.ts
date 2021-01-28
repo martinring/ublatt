@@ -5,6 +5,7 @@ import build from './build';
 import summary from './summary';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import evaluate from './evaluate';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(dirname(__filename));
@@ -60,6 +61,28 @@ yargs(process.argv.slice(2))
       }
     }),
     summary
+  )
+  .command(
+    'evaluate file',
+    'evaluate a solution',
+    (argv) => argv.options({
+      out: {
+        alias: 'o',
+        type: "string",
+        description: "file to write to",
+        default: 'stdout'
+      },
+      file: {
+        'type': 'string',
+        'required': true  
+      },
+      dataDir: {
+        type: "string",
+        default: __dirname,
+        hidden: true
+      }
+    }),
+    evaluate
   )
   .demandCommand()
   .help()

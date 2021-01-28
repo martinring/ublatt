@@ -9,8 +9,8 @@ export default function extractModules(base: PathLike): Modules {
     if (existsSync(base) && lstatSync(base).isDirectory) {
         readdirSync(base).forEach((file) => {
             const p = parse(file)
-            if (p.ext == '.js' || p.ext == '.ts') {
-                let submodules = extractModules(`${base}/${p.name}`)                
+            if (p.ext == '.js' || p.ext == '.ts' || p.ext == '.tsx') {
+                let submodules = extractModules(`${base}/${p.name}`)         
                 result.set(p.name,{ 
                     submodules: submodules,
                     css: existsSync(`${base}/${p.name}.css`)

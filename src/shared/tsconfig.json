@@ -1,7 +1,9 @@
 {
     "compilerOptions": {
         "module": "ES6",
+        "moduleResolution": "node",
         "lib": ["ES6"],
-        "composite": true
+        "composite": true,
+        "allowSyntheticDefaultImports": true
     }
 }

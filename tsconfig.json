@@ -1,6 +1,7 @@
 {
     "include": [],
     "references": [
-        { "path": "src/cli" }
+        { "path": "src/cli" },
+        { "path": "src/runtime"}
     ]
 }

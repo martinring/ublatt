@@ -1,30 +1,39 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Metadata, mergeMetadata, parseMetadata, extractMetadata } from './metadata';
+import { mergeMetadata, parseMetadata, extractMetadata } from './metadata';
 import extractModules, { Modules, Module } from './modules';
 import Markdown from './markdown'
 import esbuild from 'esbuild';
+import { transformAsync } from '@babel/core';
+// @ts-ignore
+import solid from 'babel-preset-solid';
+// @ts-ignore
+import ts from '@babel/preset-typescript';
 import handlebars from 'handlebars';
-import { Author } from '../shared/Types'
+import { Solution, Student } from '../shared/Types'
+import { readFile } from 'fs/promises'
+import { parse } from 'path'
+//import * as pack from '../../package.json';
 
-type BuildOptions = {
+export type BuildOptions = {
   source: string,
   out: string,
   meta?: string[],
-  submission?: string,
-  solution?: string,
+  submission?: Solution,
+  solution?: Solution,
   standalone: boolean,
   dataDir: string
 }
 
-export default function build(options: BuildOptions) {
+export default async function build(options: BuildOptions) {
     const dir = options.source == 'stdin' ? '.' : path.parse(options.source).dir
     const f = fs.readFileSync(options.source == 'stdin' ? 0 : options.source).toString('utf-8');
 
     const modules = extractModules(options.dataDir + '/src/runtime/modules');        
 
-    const meta: Metadata = {
+    const meta: { [key: string]: any } = {
       "lang": Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0],
+      "eval": (options.submission || options.solution) ? true : undefined
     };           
 
     if (options.meta) {
@@ -36,6 +45,10 @@ export default function build(options: BuildOptions) {
     }
     
     const markdown = extractMetadata(f,meta);    
+
+    if (options.submission) {
+      meta['authors'] = options.submission.authors
+    }
 
     const imports = [
       "import Ublatt from './src/runtime/ublatt'"
@@ -71,36 +84,71 @@ export default function build(options: BuildOptions) {
       }
     }
 
-    const md = new Markdown(dir, x => findModules("./src/runtime/modules",modules,x,"ublatt"))
+    const md = new Markdown({
+      dir: dir,
+      processClasses(x) {
+        return findModules("./src/runtime/modules",modules,x,"ublatt")
+      },
+      standalone: options.standalone
+    })
     meta['$body'] = md.render(markdown);
     
     const initArgs = []
     
     if (options.submission) {
-      let submission = fs.readFileSync(options.submission).toString('utf-8')
-      const sub = JSON.parse(submission)
-      meta['author'] = sub.authors.map((a: Author) => a.name)
-      initArgs.push(submission)
+      const sub = options.submission
+      meta['author'] = sub.authors.map((a: Student) => a.name)
+      
+      initArgs.push(JSON.stringify(sub))
     }    
     if (options.solution) {
-      let solution = fs.readFileSync(options.solution).toString('utf-8')
-      JSON.parse(solution)      
-      initArgs.push(solution)
+      let solution = options.solution      
+      initArgs.push(JSON.stringify(solution))
     }
     inits.push(`ublatt.init(${initArgs.join(", ")})`) 
 
-    const script = imports.join("; ") + ";" + inits.join("; ")    
-    const bundle = esbuild.buildSync({
+    const script = imports.join("; ") + ";" + inits.join("; ")       
+    const bundle = await esbuild.build({
       stdin: {
         contents: script,
         resolveDir: options.dataDir
       },
       bundle: true,
       platform: "browser",
-      format: "iife",
+      format: 'esm',
       write: false,
+      plugins: [
+        /*{
+          name: 'external-cdn',
+          setup(build) {
+            build.onResolve({ filter: /^katex$/ }, (args) => {
+              console.log(args.path)
+              return {
+                external: true,
+                path: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js'
+              }
+            })
+          }
+        },*/
+        {
+          name: "solid",
+          setup(build) {
+              build.onLoad({ filter: /\.(t|j)sx$/ }, async (args) => {
+                  const source = await readFile(args.path, { encoding: 'utf8' });
+                  const { name, ext } = parse(args.path)              
+                  const filename = name + ext
+                  const res = await transformAsync(source, {
+                      presets: [solid, ts],
+                      filename,
+                      sourceMaps: "inline"
+                  });
+                  return { contents: res?.code || undefined, loader: 'js' }
+              })
+          }
+        }],
       minify: true
     })
+
     bundle.warnings?.forEach(console.warn)
     
     if (bundle.outputFiles) {
@@ -109,8 +157,7 @@ export default function build(options: BuildOptions) {
 
     meta['$css'] = meta['$css'].map((x: string) => {
       let alt = x.replace('./src/runtime','./dist')      
-      if (fs.existsSync(options.dataDir + '/' + alt)) x = alt
-      console.log(x)
+      if (fs.existsSync(options.dataDir + '/' + alt)) x = alt      
       if (options.standalone) {
         const p = options.dataDir + '/' + x
         let css = fs.readFileSync(p).toString('utf-8')

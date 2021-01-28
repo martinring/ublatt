@@ -5,7 +5,7 @@ import {
   argv,
   stdin
 } from "process";
-import yargs2 from "yargs";
+import yargs from "yargs";
 
 // src/cli/build.ts
 import {
@@ -18,12 +18,12 @@ import {
 } from "path";
 
 // src/cli/metadata.ts
-import yaml2 from "yaml";
+import yaml from "yaml";
 import {
   readFile
 } from "fs/promises";
 function parseMetadata(input) {
-  return yaml2.parse(input);
+  return yaml.parse(input);
 }
 function mergeMetadata(from, to) {
   Object.keys(from).forEach((key) => {
@@ -78,7 +78,7 @@ function extractModules(base) {
   if (existsSync(base) && lstatSync(base).isDirectory) {
     readdirSync(base).forEach((file) => {
       const p = parse(file);
-      if (p.ext == ".js" || p.ext == ".ts") {
+      if (p.ext == ".js" || p.ext == ".ts" || p.ext == ".tsx") {
         let submodules = extractModules(`${base}/${p.name}`);
         result.set(p.name, {
           submodules,
@@ -94,11 +94,10 @@ function extractModules(base) {
 import markdownit from "markdown-it";
 import container from "markdown-it-container";
 import texmath from "markdown-it-texmath";
-import katex2 from "katex";
+import katex from "katex";
 import bspans from "markdown-it-bracketed-spans";
 import attrs from "markdown-it-attrs";
 import secs from "markdown-it-header-sections";
-import nomnoml2 from "nomnoml";
 import {
   existsSync as existsSync2,
   readFileSync
@@ -106,15 +105,15 @@ import {
 import {
   parse as parse2
 } from "path";
-class Markdown {
-  constructor(dir, processClasses) {
+var Markdown = class {
+  constructor(options) {
     this.md = markdownit().use(container, "classes", {
       validate(params) {
         return params.trim().match(/^(\w+\s+)*\w+$/);
       },
       render(tokens, idx) {
         const classes = tokens[idx].info.trim().split(/\s+/);
-        processClasses?.(classes);
+        options.processClasses?.(classes);
         if (tokens[idx].nesting === 1) {
           return `<div class="${classes.join(" ")}">
 `;
@@ -122,8 +121,9 @@ class Markdown {
           return "</div>\n";
         }
       }
-    }).use(texmath, {engine: katex2, delimiters: "dollars"}).use(bspans).use(attrs).use(secs);
-    if (processClasses) {
+    }).use(texmath, {engine: katex, delimiters: "dollars"}).use(bspans).use(attrs).use(secs);
+    if (options.processClasses) {
+      const processClasses = options.processClasses;
       const renderAttrs = this.md.renderer.renderAttrs;
       this.md.renderer.renderAttrs = function(tkn) {
         if (tkn.attrs) {
@@ -136,42 +136,45 @@ class Markdown {
         return renderAttrs(tkn);
       };
     }
-    this.md.renderer.rules.image = function(tokens, idx, options, env, slf) {
+    this.md.renderer.rules.image = function(tokens, idx, opts, env, slf) {
       const token = tokens[idx];
       let src = token.attrGet("src");
-      if (src && existsSync2(dir + "/" + src)) {
+      if (src && existsSync2(options.dir + "/" + src)) {
         const mime = "image/" + parse2(src).ext.slice(1);
-        const uri = `data:${mime};base64,${readFileSync(dir + "/" + src).toString("base64")}`;
+        const uri = `data:${mime};base64,${readFileSync(options.dir + "/" + src).toString("base64")}`;
         token.attrSet("src", uri);
       } else {
         console.warn(src + " does not exist");
       }
-      return slf.renderToken(tokens, idx, options);
+      return slf.renderToken(tokens, idx, opts);
     };
-    this.md.renderer.rules.fence = function(tokens, idx, options, env, slf) {
+    this.md.renderer.rules.fence = function(tokens, idx, options2, env, slf) {
       const token = tokens[idx];
       token.attrJoin("class", token.info);
-      if (token.attrGet("class") == "nomnoml") {
-        return nomnoml2.renderSvg(token.content);
-      } else {
-        return "<pre" + slf.renderAttrs(token) + "><code>" + token.content + "</code></pre>";
-      }
+      return "<pre" + slf.renderAttrs(token) + "><code>" + token.content + "</code></pre>";
     };
   }
   render(input) {
     return this.md.render(input);
   }
-}
+};
+var markdown_default = Markdown;
 
 // src/cli/build.ts
-import esbuild2 from "esbuild";
-import handlebars2 from "handlebars";
-function build(options) {
+import esbuild from "esbuild";
+import {transformAsync} from "@babel/core";
+import solid from "babel-preset-solid";
+import ts from "@babel/preset-typescript";
+import handlebars from "handlebars";
+import {readFile as readFile2} from "fs/promises";
+import {parse as parse4} from "path";
+async function build(options) {
   const dir = options.source == "stdin" ? "." : parse3(options.source).dir;
   const f = readFileSync2(options.source == "stdin" ? 0 : options.source).toString("utf-8");
-  const modules2 = extractModules(options.dataDir + "/src/runtime/modules");
+  const modules = extractModules(options.dataDir + "/src/runtime/modules");
   const meta = {
-    lang: Intl.DateTimeFormat().resolvedOptions().locale.split("-")[0]
+    lang: Intl.DateTimeFormat().resolvedOptions().locale.split("-")[0],
+    eval: options.submission || options.solution ? true : void 0
   };
   if (options.meta) {
     options.meta.forEach((x) => {
@@ -180,7 +183,10 @@ function build(options) {
       mergeMetadata(m, meta);
     });
   }
-  const markdown2 = extractMetadata(f, meta);
+  const markdown = extractMetadata(f, meta);
+  if (options.submission) {
+    meta["authors"] = options.submission.authors;
+  }
   const imports = [
     "import Ublatt from './src/runtime/ublatt'"
   ];
@@ -191,10 +197,10 @@ function build(options) {
     `window.ublatt = ublatt`
   ];
   meta["$css"] = ["./src/runtime/ublatt.css"];
-  function findModules(base, modules3, classes, parent) {
-    if (modules3.size > 0) {
+  function findModules(base, modules2, classes, parent) {
+    if (modules2.size > 0) {
       classes.forEach((c) => {
-        const module = modules3.get(c);
+        const module = modules2.get(c);
         if (module) {
           if (!imported.has(module)) {
             imported.add(module);
@@ -210,31 +216,53 @@ function build(options) {
       });
     }
   }
-  const md = new Markdown(dir, (x) => findModules("./src/runtime/modules", modules2, x, "ublatt"));
-  meta["$body"] = md.render(markdown2);
+  const md = new markdown_default({
+    dir,
+    processClasses(x) {
+      return findModules("./src/runtime/modules", modules, x, "ublatt");
+    },
+    standalone: options.standalone
+  });
+  meta["$body"] = md.render(markdown);
   const initArgs = [];
   if (options.submission) {
-    let submission = readFileSync2(options.submission).toString("utf-8");
-    const sub = JSON.parse(submission);
+    const sub = options.submission;
     meta["author"] = sub.authors.map((a) => a.name);
-    initArgs.push(submission);
+    initArgs.push(JSON.stringify(sub));
   }
   if (options.solution) {
-    let solution = readFileSync2(options.solution).toString("utf-8");
-    JSON.parse(solution);
-    initArgs.push(solution);
+    let solution = options.solution;
+    initArgs.push(JSON.stringify(solution));
   }
   inits.push(`ublatt.init(${initArgs.join(", ")})`);
   const script = imports.join("; ") + ";" + inits.join("; ");
-  const bundle = esbuild2.buildSync({
+  const bundle = await esbuild.build({
     stdin: {
       contents: script,
       resolveDir: options.dataDir
     },
     bundle: true,
     platform: "browser",
-    format: "iife",
+    format: "esm",
     write: false,
+    plugins: [
+      {
+        name: "solid",
+        setup(build2) {
+          build2.onLoad({filter: /\.(t|j)sx$/}, async (args) => {
+            const source = await readFile2(args.path, {encoding: "utf8"});
+            const {name, ext} = parse4(args.path);
+            const filename = name + ext;
+            const res = await transformAsync(source, {
+              presets: [solid, ts],
+              filename,
+              sourceMaps: "inline"
+            });
+            return {contents: res?.code || void 0, loader: "js"};
+          });
+        }
+      }
+    ],
     minify: true
   });
   bundle.warnings?.forEach(console.warn);
@@ -245,7 +273,6 @@ function build(options) {
     let alt = x.replace("./src/runtime", "./dist");
     if (existsSync3(options.dataDir + "/" + alt))
       x = alt;
-    console.log(x);
     if (options.standalone) {
       const p = options.dataDir + "/" + x;
       let css = readFileSync2(p).toString("utf-8");
@@ -286,11 +313,11 @@ ${css}
     pagetitle += " - " + meta["subtitle"];
   meta["$pagetitle"] = pagetitle;
   const footerTemplateSrc = readFileSync2(options.dataDir + "/templates/submit.html").toString("utf-8");
-  const footerTemplate = handlebars2.compile(footerTemplateSrc);
+  const footerTemplate = handlebars.compile(footerTemplateSrc);
   if (!options.submission)
     meta["$footer"] = footerTemplate(meta);
   const templateSrc = readFileSync2(options.dataDir + "/templates/ublatt.html").toString("utf-8");
-  const template = handlebars2.compile(templateSrc);
+  const template = handlebars.compile(templateSrc);
   if (options.out == "stdout") {
     process.stdout.write(template(meta));
   } else {
@@ -304,27 +331,27 @@ import {
   readdirSync as readdirSync2
 } from "fs";
 import {
-  parse as parse4
+  parse as parse5
 } from "path";
 function summary(options) {
   let course = null;
   const sheets = {};
   const students = {};
   const handins = {};
-  readdirSync2(options.dir).filter((x) => parse4(x).ext == ".json").map((x) => {
+  readdirSync2(options.dir).filter((x) => parse5(x).ext == ".json").map((x) => {
     const src = readFileSync3(options.dir + x).toString("utf-8");
     const obj = JSON.parse(src);
     if (course == null) {
       course = obj.course;
     } else if (course != obj.course) {
-      console.error(`found submissions to multiple courses (${course} and ${obj.course})`);
+      console.error(`- found submissions to multiple courses (${course} and ${obj.course})`);
     }
     obj.authors.forEach((a) => {
       students[a.matriculation_number] = students[a.matriculation_number] || a;
       if (!handins[a.matriculation_number])
         handins[a.matriculation_number] = {};
       if (handins[a.matriculation_number][obj.sheet])
-        console.warn(`multiple submissions for sheet ${obj.sheet} from ${a.name} (${a.matriculation_number})`);
+        console.warn(`- multiple submissions for sheet ${obj.sheet} from ${a.name} (${a.matriculation_number})`);
       else
         handins[a.matriculation_number][obj.sheet] = obj;
     });
@@ -332,20 +359,66 @@ function summary(options) {
       sheets[obj.sheet] = [];
     sheets[obj.sheet].push(obj);
   });
-  Object.entries(students).forEach(([x, y]) => {
-    console.log(`${y.name} (${x}): ${Object.keys(handins[y.matriculation_number]).join(", ")}`);
-  });
+  console.log("## Sheets\n");
   Object.entries(sheets).forEach(([x, y]) => {
-    console.log(`sheet ${x}: ${y.length} handins from ${y.map((x2) => x2.authors.length).reduce((x2, y2) => x2 + y2)} students`);
+    console.log(`- sheet ${x}: ${y.length} handins from ${y.map((x2) => x2.authors.length).reduce((x2, y2) => x2 + y2)} students`);
   });
+  console.log("\n## Missing handins\n");
+  Object.entries(students).forEach(([x, y]) => {
+    const e = handins[y.matriculation_number];
+    const missing = Object.keys(sheets).filter((x2) => e[x2] === void 0);
+    if (missing.length > 0)
+      console.log(`- ${y.name} (${x}): ${missing.join(", ")}`);
+  });
+  console.log("\n");
 }
 
 // src/cli/ublatt.ts
 import {dirname} from "path";
 import {fileURLToPath} from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(dirname(__filename));
-yargs2(argv.slice(2)).scriptName("ublatt").options({
+
+// src/cli/evaluate.ts
+import {
+  readFileSync as readFileSync4,
+  readdirSync as readdirSync3,
+  statSync
+} from "fs";
+function evaluate(options) {
+  function makeBuildOptions(s) {
+    const y = readdirSync3("./solutions").map((x) => JSON.parse(readFileSync4("./solutions/" + x).toString("utf-8"))).find((x) => x.sheet == s.sheet);
+    const z = readdirSync3("./sheets").map((x) => "./sheets/" + x).find((x) => {
+      const meta = {};
+      extractMetadata(readFileSync4(x).toString("utf-8"), meta);
+      return meta.sheet == s.sheet;
+    });
+    options.submission = s;
+    options.solution = y;
+    if (!z)
+      throw new Error("could not find sheet");
+    options.source = z;
+    return options;
+  }
+  if (statSync(options.file).isDirectory()) {
+    const counters = {};
+    const xs = readdirSync3(options.file).filter((x) => x.endsWith(".json")).forEach((x) => {
+      const c = readFileSync4(options.file + "/" + x).toString("utf-8");
+      const s = JSON.parse(c);
+      const opts = makeBuildOptions(s);
+      const n = counters[s.sheet] = counters[s.sheet] + 1 || 1;
+      opts.out = `${options.file}/sheet${s.sheet}-${n}.html`;
+      build(opts);
+    });
+  } else {
+    const x = readFileSync4(options.file).toString("utf-8");
+    const s = JSON.parse(x);
+    build(makeBuildOptions(s));
+  }
+}
+
+// src/cli/ublatt.ts
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = dirname(dirname(__filename));
+yargs(argv.slice(2)).scriptName("ublatt").options({
   meta: {
     type: "array",
     description: "path to meta yaml file",
@@ -383,4 +456,20 @@ yargs2(argv.slice(2)).scriptName("ublatt").options({
     type: "string",
     default: "."
   }
-}), summary).demandCommand().help().argv;
+}), summary).command("evaluate file", "evaluate a solution", (argv2) => argv2.options({
+  out: {
+    alias: "o",
+    type: "string",
+    description: "file to write to",
+    default: "stdout"
+  },
+  file: {
+    type: "string",
+    required: true
+  },
+  dataDir: {
+    type: "string",
+    default: __dirname,
+    hidden: true
+  }
+}), evaluate).demandCommand().help().argv;

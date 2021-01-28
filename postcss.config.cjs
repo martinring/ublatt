@@ -18,11 +18,11 @@ module.exports = {
                 }
             }
         },
-        require('postcss-url')({
-            filter: "**/*.!(woff2|eot|ttf|otf)",
-            url: "copy"            
+        require('postcss-url')({            
+            url: 'copy',
+            assetsPath: 'assets'
         }),
-        require('cssnano')({            
+        require('cssnano')({
         })
     ]
 }

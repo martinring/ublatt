@@ -6,8 +6,7 @@ MermaidAPI.initialize({
   theme: "default",
 })
 
-export default class Mermaid implements InputMode {
-  language = []
+export default class Mermaid implements InputMode {  
   render(x: string, elem: Element, name: string) {
     MermaidAPI.render(name, x, (svg: string) => {
       elem.innerHTML = svg;

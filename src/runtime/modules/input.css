@@ -58,6 +58,21 @@
     margin-bottom: 0;
 }
 
+.input>.editor:empty::after {
+    content: ' ';
+  }
+
+.input>.editor {
+    font-family: 'JetBrains Mono';    
+    padding: 0.5rem;
+    resize: none !important;  
+    background: #eee;  
+}
+
+.input:not(.rendered)>.editor {
+    border: 0.05rem solid #000;    
+}
+
 .input.rendered>.editor {
     position: absolute;
     top: 100%;
@@ -69,15 +84,18 @@
     border-bottom: 0.05rem solid #000;
     border-right: 0.05rem solid #000;
     opacity: 0;
+    
     transform-origin: 50% 0;
     transform: scaleY(0);
     transition: transform 0.3s ease, opacity 0.3s ease;
-    background: #eee;
+    
     pointer-events: none;
     z-index: 10000;
+    min-height: 1rem;
+    max-height: 200px;
 }
 
-.input>.editor>.cm-wrap {
+/*.input>.editor>.cm-wrap {
     background: #eee;
     height: auto;
     max-height: 200px;
@@ -87,7 +105,7 @@
 
 .input>.editor>.ͼ1.cm-focused {
     outline: none;
-}
+}*/
 
 .input>.help {
     position: absolute;
@@ -146,11 +164,15 @@
     font-family: "JetBrains Mono";
     color: #f44336;
 }
-
+/*
 .input .cm-wrap {
     font-family: "JetBrains Mono";
 }
 
 .input .ͼ1 .cm-scroller {
     font-family: "JetBrains Mono" !important;
+}*/
+
+.input > .editor .keyword {
+  font-weight: bold;
 }
