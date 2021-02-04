@@ -1,5 +1,7 @@
 import { Exercise, Solution, ExerciseType, Author, Student, Ublatt } from './Types';
 import { Authors } from './authors'
+import './ublatt.css'
+import render from './render'
 
 declare global {
   function execCommand(command: "foreColor", ui: boolean, value: string): void
@@ -10,10 +12,10 @@ export default class implements Ublatt {
 
   private readonly exerciseTypes = new Map<string,ExerciseType<any>>()
   private readonly exercises: { [id: string]: Exercise<any> } = { }  
-  private readonly authors?: Authors
+  private readonly authors?: ReturnType<typeof Authors>
   private readonly sheet: Element
   private readonly metadata: { [id: string]: any }  
-  
+
   private write() {
     let res: Solution = {
       course: this.metadata.title,
@@ -46,13 +48,21 @@ export default class implements Ublatt {
     if (!at) {
       console.warn("table with class authors was not found")
     } else {
-      this.authors = new Authors(at,[{name: "", email: "", matriculation_number: ""}])
-    }    
+      this.authors = Authors(at,[{name: "", email: "", matriculation_number: ""}])
+    }
   }
 
   evalMode: boolean = false
 
   init(submission?: Solution, solution?: Solution) {
+    const self = this
+    render(µ => 
+      document.getElementById('submit-buttons')?.append(
+        µ('a',{ class: ['icon','large'], events: { click: () => self.save() } },µ('i',{ class: 'icon-popout' }), ' Speichern'),
+        µ('a',{ class: ['icon','large'], events: { click: () => self.load() } },µ('i',{ class: 'icon-popin' }), ' Laden'),
+        µ('a',{ class: ['icon','large'], events: { click: () => self.clearSheet() } },µ('i',{ class: 'icon-trashcan' }), ' Leeren')
+      )
+    )
     if (this.exerciseTypes.size == 0) {
       console.warn("no exercise types were registerd before init")
       return
@@ -253,7 +263,6 @@ export default class implements Ublatt {
 
   public emailify() {
     document.body.innerHTML = document.body.innerHTML;
-    document.querySelector('.ublatt > .head')?.remove()
     for (const script of Array.from(document.getElementsByTagName('script'))) {      
       script.remove()
     }
@@ -261,15 +270,23 @@ export default class implements Ublatt {
     const link = document.createElement('a')
     const styles = Array.from(document.styleSheets).flatMap(x => Array.from(x.rules)).map(x => x.cssText).join("\n")
     console.log(this.metadata)
+    const boundary = "a893q4h87hadsfg08gsdifuhgosdifg"
     const data =
       `To: ${(this.metadata.authors as Student[]).map(a => `"${a.name.trim()}" <${a.email.trim()}>`).join(', ')}\n` +
-      `Subject: [${this.metadata.title}] Bewertung Blatt ${this.metadata.sheet}\n` +
-      `From: martin.ring@dfki.de\n`+
-      `X-Unsent: \n` +
-      `Content-Type: text/html; charset="utf-8"\n\n` +
-      `<html><head><style>${styles}</style></head><body class="email">${document.body.innerHTML}</body></html>`
+      `Subject: [${this.metadata.title}] Bewertung Blatt ${this.metadata.sheet}\n` +            
+      `Content-Type: multipart/mixed; boundary="${boundary}"\n` +            
+      `\r\n--${boundary}\n` +
+      `Content-Type: text/plain;charset="utf-8"\n\n` +
+      `Hallo,\n\n` +
+      `Im Anhang kommt eure Bewertung für Übungsblatt ${this.metadata.sheet}. ${document.querySelector('.main .points')?.textContent}\n\n` +
+      `Viele Grüße, Martin\n` +
+      `\r\n--${boundary}\n` +
+      `Content-Type: text/html; charset="utf-8"; name="eval${this.metadata.sheet}.html"\n` +
+      `Content-Disposition: attachment; filename="eval${this.metadata.sheet}.html"\n\n` +
+      `<html><head><style>${styles}</style></head><body class="email">${document.body.innerHTML}</body></html>\n` + 
+      `\r\n--${boundary}--` 
     link.download = `sheet${this.metadata.sheet}.eml`
-    const blob = new Blob([data],{type: "text/plain"})
+    const blob = new Blob([data],{type: "message/rfc822"})
     link.href = URL.createObjectURL(blob)
     link.click()    
   }

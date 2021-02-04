@@ -1,18 +1,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { mergeMetadata, parseMetadata, extractMetadata } from './metadata';
-import extractModules, { Modules, Module } from './modules';
+import extractModules, { Modules } from './modules';
 import Markdown from './markdown'
 import esbuild from 'esbuild';
-import { transformAsync } from '@babel/core';
-// @ts-ignore
-import solid from 'babel-preset-solid';
-// @ts-ignore
-import ts from '@babel/preset-typescript';
-import handlebars from 'handlebars';
-import { Solution, Student } from '../shared/Types'
-import { readFile } from 'fs/promises'
-import { parse } from 'path'
+import { Solution, Student } from '../shared/Types';
+import { readFile } from 'fs/promises';
+import externals from './externals';
+import Main from '../shared/templates/main';
+import Header from '../shared/templates/header';
+import Submit from '../shared/templates/submit';
+import render from './render';
+import { buildParserFile } from 'lezer-generator';
+
 //import * as pack from '../../package.json';
 
 export type BuildOptions = {
@@ -32,8 +32,8 @@ export default async function build(options: BuildOptions) {
     const modules = extractModules(options.dataDir + '/src/runtime/modules');        
 
     const meta: { [key: string]: any } = {
-      "lang": Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0],
-      "eval": (options.submission || options.solution) ? true : undefined
+      lang: Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0],
+      eval: (options.submission || options.solution) ? true : undefined
     };           
 
     if (options.meta) {
@@ -44,7 +44,14 @@ export default async function build(options: BuildOptions) {
       })
     }
     
-    const markdown = extractMetadata(f,meta);    
+    const markdown = extractMetadata(f,meta);
+
+    meta.author = meta.author || []
+
+    var pagetitle = "" 
+    if (meta['sheet'] !== undefined) pagetitle += meta['sheet'].toString() + (meta.i18n?.["sheet-title"] || ". Übungsblatt") + " - "
+    pagetitle += meta['title'] || "ublatt"
+    if (meta['subtitle']) pagetitle += " - " + meta['subtitle']
 
     if (options.submission) {
       meta['authors'] = options.submission.authors
@@ -54,7 +61,7 @@ export default async function build(options: BuildOptions) {
       "import Ublatt from './src/runtime/ublatt'"
     ]
 
-    const imported = new Set<Module>()
+    const imported = new Set<string>()
 
     const inits = [
       `const meta = ${JSON.stringify(meta)}`,
@@ -62,23 +69,19 @@ export default async function build(options: BuildOptions) {
       `window.ublatt = ublatt`
     ]  
     
-    meta['$css'] = ["./src/runtime/ublatt.css"];
-
     function findModules(base: string, modules: Modules, classes: string[], parent: string) {
       if (modules.size > 0) {
-        classes.forEach(c => {
-          const module = modules.get(c)
-          if (module) {            
-            if (!imported.has(module)) {
-              imported.add(module)              
-              imports.push(`import ${c.charAt(0).toUpperCase() + c.slice(1)} from '${base}/${c}'`)
+        classes.forEach(c => {          
+          const submodules = modules.get(c)          
+          if (submodules) {   
+            const path = `${base}/${c}`         
+            if (!imported.has(path)) {
+              imported.add(path)
+              imports.push(`import ${c.charAt(0).toUpperCase() + c.slice(1)} from '${path}'`)
               inits.push(`const ${c} = new ${c.charAt(0).toUpperCase() + c.slice(1)}()`)
               inits.push(`${parent}.registerModule('${c}',${c})`)
-              if (module.css) {
-                meta['$css'].push(base + "/" + c + ".css")
-              }
             }
-            findModules(base + "/" + c, module.submodules, classes, c)
+            findModules(base + "/" + c, submodules, classes, c)
           }
         })
       }
@@ -91,23 +94,27 @@ export default async function build(options: BuildOptions) {
       },
       standalone: options.standalone
     })
-    meta['$body'] = md.render(markdown);
+
+    const body: string = md.render(markdown);
     
     const initArgs = []
     
     if (options.submission) {
       const sub = options.submission
-      meta['author'] = sub.authors.map((a: Student) => a.name)
-      
+      meta['author'] = sub.authors.map((a: Student) => a.name)    
       initArgs.push(JSON.stringify(sub))
     }    
+  
     if (options.solution) {
       let solution = options.solution      
       initArgs.push(JSON.stringify(solution))
     }
+
     inits.push(`ublatt.init(${initArgs.join(", ")})`) 
 
-    const script = imports.join("; ") + ";" + inits.join("; ")       
+    let script: string = imports.join("; ") + ";" + inits.join("; ")  
+    let style: string = ''     
+
     const bundle = await esbuild.build({
       stdin: {
         contents: script,
@@ -116,46 +123,49 @@ export default async function build(options: BuildOptions) {
       bundle: true,
       platform: "browser",
       format: 'esm',
+      outdir: options.dataDir + '/dist',
       write: false,
+      loader: {
+        '.woff': 'dataurl',
+        '.svg': 'dataurl'        
+      },
       plugins: [
-        /*{
-          name: 'external-cdn',
+        {
+          name: 'externals',
           setup(build) {
-            build.onResolve({ filter: /^katex$/ }, (args) => {
-              console.log(args.path)
+            build.onResolve({ filter: externals.filter }, (args) => {              
               return {
                 external: true,
-                path: 'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js'
+                path: externals.path(args.path) 
               }
             })
           }
-        },*/
+        },
         {
-          name: "solid",
+          name: "lezer",
           setup(build) {
-              build.onLoad({ filter: /\.(t|j)sx$/ }, async (args) => {
-                  const source = await readFile(args.path, { encoding: 'utf8' });
-                  const { name, ext } = parse(args.path)              
-                  const filename = name + ext
-                  const res = await transformAsync(source, {
-                      presets: [solid, ts],
-                      filename,
-                      sourceMaps: "inline"
-                  });
-                  return { contents: res?.code || undefined, loader: 'js' }
+            build.onLoad({ filter: /\.grammar$/ }, async (args) => { 
+              const source = await readFile(args.path, { encoding: 'utf-8' });
+              const { parser } = buildParserFile(source, {
               })
+              return {
+                contents: parser,
+                loader: 'js'
+              }
+            })
           }
         }],
       minify: true
     })
 
-    bundle.warnings?.forEach(console.warn)
-    
+    bundle.warnings?.forEach(console.warn)        
+
     if (bundle.outputFiles) {
-      meta['$script'] = bundle.outputFiles[0].text.replaceAll("</script>","<\\/script>")
+      script = bundle.outputFiles[0].text.replaceAll("</script>","<\\/script>")
+      style = bundle.outputFiles[1].text
     }
 
-    meta['$css'] = meta['$css'].map((x: string) => {
+    /*meta['$css'] = meta['$css'].map((x: string) => {
       let alt = x.replace('./src/runtime','./dist')      
       if (fs.existsSync(options.dataDir + '/' + alt)) x = alt      
       if (options.standalone) {
@@ -175,26 +185,37 @@ export default async function build(options: BuildOptions) {
         })
         return `<style>\n${css}\n</style>`
       } else return `<link rel="stylesheet" href="${x}"/>`
-    })
+    })*/
 
     meta['$dir'] = "dist";
 
-    var pagetitle = "" 
-    if (meta['sheet'] !== undefined) pagetitle += meta['sheet'].toString() + (meta.i18n?.["sheet-title"] || ". Übungsblatt") + " - "
-    pagetitle += meta['title'] || "ublatt"
-    if (meta['subtitle']) pagetitle += " - " + meta['subtitle']
-    meta['$pagetitle'] = pagetitle;
-    const footerTemplateSrc = fs.readFileSync(options.dataDir + "/templates/submit.html").toString('utf-8')
-    const footerTemplate = handlebars.compile(footerTemplateSrc)
+    //const footerTemplateSrc = fs.readFileSync(options.dataDir + "/templates/submit.html").toString('utf-8')
+    //const footerTemplate = handlebars.compile(footerTemplateSrc)
     
-    if (!options.submission) meta['$footer'] = footerTemplate(meta)
+    //if (!options.submission) meta['$footer'] = footerTemplate(meta)
 
-    const templateSrc = fs.readFileSync(options.dataDir + '/templates/ublatt.html').toString('utf-8');
-    const template = handlebars.compile(templateSrc)
+
+    //const templateSrc = fs.readFileSync(options.dataDir + '/templates/ublatt.html').toString('utf-8');
+    //const template = handlebars.compile(templateSrc)
+
+    const footer: string = render(µ => µ.when(!options.submission, () => Submit({ buttons: 'submit-buttons' })(µ)))
+
+    meta.authors = meta.authors || meta.author.map((x: string) => ({name: x}))
+
+    const output = render(Main({
+      lang: meta.lang,
+      authors: meta.authors || [],
+      pagetitle, 
+      header: render(Header(meta)),
+      body,
+      script,
+      style,
+      footer
+    }))
 
     if (options.out == 'stdout') {
-        process.stdout.write(template(meta))
-    } else {
-        fs.writeFileSync(options.out, template(meta))
+        process.stdout.write(output)
+    } else {        
+        fs.writeFileSync(options.out, output)
     }
 }

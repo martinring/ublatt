@@ -1,5 +1,5 @@
 
-import { Exercise } from '../shared/Types'
+import { Exercise, Student } from '../shared/Types'
 export { Exercise, Author, Solution, Student } from '../shared/Types'
 
 export interface Eval<T> {
@@ -34,5 +34,6 @@ export interface Ublatt extends Modules<ExerciseType<any>> {
     load(): void
     clearSheet(): void
     emailify(): void
-    //exercises: { [id: string]: Exercise<any> }
+    /*getAuthors(): Student[]
+    setAuthors(authors: Student[]): void*/
 }

@@ -2,8 +2,9 @@
     "compilerOptions": {
         "module": "ES6",
         "moduleResolution": "node",
-        "lib": ["ES6"],
+        "lib": ["ES6","DOM"],        
         "composite": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "outDir": "../../.build/shared"
     }
 }

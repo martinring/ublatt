@@ -1,24 +1,15 @@
-import { onMount } from 'solid-js';
+import './input.css';
+
 import { ExerciseType, Modules, Eval } from '../Types';
-
-import { CodeJar } from 'codejar';
-
-type CodeJarOptions = {
-  tab: string;
-  indentOn: RegExp;
-  spellcheck: boolean;
-  addClosing: boolean;
-};
-
-const defaultCodeJarOptions: Partial<CodeJarOptions> = {
-  tab: '  ',
-  spellcheck: false
-}
+import { EditorView, keymap, ViewPlugin } from '@codemirror/view';
+import { EditorState, Extension } from '@codemirror/state';
+import { standardKeymap } from '@codemirror/commands';
+import { history, historyKeymap } from '@codemirror/history';
+import { defaultHighlightStyle } from '@codemirror/highlight';
 
 export interface InputMode {
   render?(code: string, elem: HTMLElement, name: string): void
-  highlight?(elem: HTMLElement): void
-  language?: Partial<CodeJarOptions>
+  language?: Extension
   help?: string
   name?: string
 }
@@ -71,18 +62,23 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
       let editorWrapper = document.createElement("div");
       editorWrapper.classList.add("editor");
       elem.appendChild(editorWrapper);      
-
-      const view = CodeJar(
-        editorWrapper,
-        inputMode.highlight || (() => {}),
-        Object.assign({},defaultCodeJarOptions,inputMode.language)        
-      )
       
-
-      editorWrapper.addEventListener('blur',() => elem.classList.remove('editing'))
-      editorWrapper.addEventListener('focus',() => elem.classList.add('editing'))                      
-
-      let set = (text: string) => view.updateCode(text)      
+      const setup: Extension[] = [
+        keymap.of(standardKeymap),
+        history(), keymap.of(historyKeymap),        
+        defaultHighlightStyle,
+        EditorView.theme({
+          $scroller: {
+            fontFamily: 'JetBrains Mono',
+            fontSize: '80%'            
+          },
+          $gutters: {
+            color: '#237893'
+          }          
+        })
+      ]
+      
+      if (inputMode.language) setup.push(inputMode.language)
 
       if (inputMode.render) {
         let timeout: undefined | number
@@ -90,8 +86,6 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
         const updateRendered = function(text: string) {
           if (timeout) window.clearTimeout(timeout);
           timeout = undefined;
-          //if (errorMarker) errorMarker.clear();
-          //errorMarker = null;
           let before = rendered.innerHTML;
           try {                              
             if (text.trim().length > 0) {
@@ -114,38 +108,62 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
             else
               timeout = window.setTimeout(show, 1000);
           }
-        }
+        }        
+
         let render = inputMode.render
         elem.classList.add("rendered")
         let rendered = document.createElement("div");
         rendered.classList.add("rendered");
-        elem.appendChild(rendered);
-        view.onUpdate((text) => {      
-          updateRendered(text)    
-        })
-        set = (text) => {
-          view.updateCode(text)
-          updateRendered(text)
-        }
+        elem.appendChild(rendered);        
         editorWrapper.addEventListener("transitionend", function () {
           if (elem.classList.contains("editing")) {
-            editorWrapper.focus()
+            view.focus()
           }
         });
         elem.addEventListener("click", function () {
           {
             elem.classList.add("editing");
           }
-        })   
-      }
-          
-      set(text || "")
+        })
 
+        setup.push(EditorView.domEventHandlers({
+          "focus": (e) => elem.classList.add('editing'),
+          "blur": (e) => elem.classList.remove('editing')
+        }))
+
+        setup.push(ViewPlugin.define(view => {
+          return {
+            update(update) {
+              if (update.docChanged) updateRendered(update.state.sliceDoc())
+            }
+          } 
+        }))
+      }
+
+      const state = EditorState.create({
+        doc: text || '',
+        extensions: setup
+      })
+     
+      const view = new EditorView({
+        state, parent: editorWrapper
+      })      
+                
       elem.dispatchEvent(new Event('keyup',{}))
 
       return {
-        get: () => view.toString(),
-        set
+        get: () => view.state.sliceDoc(),
+        set: (v: string) => {
+          if (view.state.sliceDoc() != v) {
+            view.dispatch({
+              changes: [{
+                from: 0,
+                to: view.state.doc.length,
+                insert: v
+              }]
+            })
+          }
+        }
       }
     } else {
       elem.classList.add("default")

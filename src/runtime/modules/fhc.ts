@@ -1,18 +1,12 @@
 import { Exercise, Eval, MultiPartExerciseType } from "../Types";
 import Input from './input'
 import * as katex from 'katex'
-import Prism from 'prismjs'
-import 'prismjs/components/prism-latex';
-
 
 export default class FHC extends MultiPartExerciseType<string> {
   makeAll(elem: Element, name: string): Exercise<string>[] {    
     const regex = /^(\s*){(.*)}\s*$/
     const input = new Input()
-    input.registerModule('logic', {      
-      highlight(elem) {
-        elem.innerHTML = Prism.highlight(elem.textContent || "", Prism.languages['latex'])
-      },
+    input.registerModule('logic', {            
       render: (code,elem,name) => {        
         elem.innerHTML = ''
         code.split('\n').forEach(line => {

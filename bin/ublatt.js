@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 // src/cli/ublatt.ts
+import "source-map-support/register.js";
 import {
   argv,
   stdin
@@ -9,7 +10,6 @@ import yargs from "yargs";
 
 // src/cli/build.ts
 import {
-  existsSync as existsSync3,
   readFileSync as readFileSync2,
   writeFileSync
 } from "fs";
@@ -78,12 +78,9 @@ function extractModules(base) {
   if (existsSync(base) && lstatSync(base).isDirectory) {
     readdirSync(base).forEach((file) => {
       const p = parse(file);
-      if (p.ext == ".js" || p.ext == ".ts" || p.ext == ".tsx") {
+      if (p.ext == ".ts" || p.ext == ".tsx") {
         let submodules = extractModules(`${base}/${p.name}`);
-        result.set(p.name, {
-          submodules,
-          css: existsSync(`${base}/${p.name}.css`)
-        });
+        result.set(p.name, submodules);
       }
     });
   }
@@ -162,12 +159,173 @@ var markdown_default = Markdown;
 
 // src/cli/build.ts
 import esbuild from "esbuild";
-import {transformAsync} from "@babel/core";
-import solid from "babel-preset-solid";
-import ts from "@babel/preset-typescript";
-import handlebars from "handlebars";
 import {readFile as readFile2} from "fs/promises";
-import {parse as parse4} from "path";
+
+// externals.json
+var externals_default = {};
+
+// package.json
+var name = "ublatt";
+var files = [
+  "*",
+  "dist/*"
+];
+var main = "dist/ublatt.js";
+var version = "1.3.1";
+var description = "An interactive exercise sheet generator";
+var homepage = "https://github.com/martinring/ublatt";
+var license = "MIT";
+var bugs = "https://github.com/martinring/ublatt/issues";
+var scripts = {
+  build: "./build.js",
+  clean: "rm -rf dist"
+};
+var author = "Martin Ring <martin.ring@dfki.de> (https://www.martinring.de)";
+var repository = "github:martinring/ublatt";
+var type = "module";
+var bin = {
+  ublatt: "node --enable-source-maps bin/ublatt.js"
+};
+var os = [
+  "darwin",
+  "linux"
+];
+var dependencies = {
+  "@codemirror/commands": "^0.17.0",
+  "@codemirror/gutter": "^0.17.0",
+  "@codemirror/highlight": "^0.17.0",
+  "@codemirror/history": "^0.17.0",
+  "@codemirror/language": "^0.17.0",
+  "@codemirror/legacy-modes": "^0.17.0",
+  "@codemirror/state": "^0.17.0",
+  "@codemirror/view": "^0.17.0",
+  esbuild: "^0.8.31",
+  katex: "^0.12.0",
+  "lezer-generator": "^0.13.2",
+  "markdown-it": "^12.0.4",
+  "markdown-it-attrs": "^4.0.0",
+  "markdown-it-bracketed-spans": "^1.0.1",
+  "markdown-it-container": "^3.0.0",
+  "markdown-it-header-sections": "^1.0.0",
+  "markdown-it-texmath": "0.8.0",
+  mermaid: "8.9.0",
+  prismjs: "1.21.0",
+  punycode: "^2.1.1",
+  "source-map-support": "0.5.19",
+  yaml: "^1.10.0",
+  yargs: "^16.2.0"
+};
+var devDependencies = {
+  "@types/babel__core": "^7.1.12",
+  "@types/katex": "^0.11.0",
+  "@types/markdown-it": "^12.0.1",
+  "@types/markdown-it-container": "^2.0.3",
+  "@types/mermaid": "8.2.1",
+  "@types/node": "^14.14.19",
+  "@types/prismjs": "1.9.0",
+  "@types/yargs": "^16.0.0",
+  tslib: "2.1.0",
+  typescript: "^4.1.3"
+};
+var package_default = {
+  name,
+  files,
+  main,
+  version,
+  description,
+  homepage,
+  license,
+  bugs,
+  scripts,
+  author,
+  repository,
+  type,
+  bin,
+  os,
+  dependencies,
+  devDependencies
+};
+
+// src/cli/externals.ts
+var externals_default2 = {
+  filter: RegExp(`^(${Object.keys(externals_default).join("|")})$`),
+  path(key) {
+    return externals_default[key].replace(/\$\{\s*version\s*\}/, package_default.dependencies[key]);
+  }
+};
+
+// src/shared/templates/main.ts
+function main_default(props) {
+  return (h) => h.fragment(h.fromString("<!DOCTYPE html>"), h("html", {lang: props.lang}, h("head", {}, h("meta", {name: "generator", content: "ublatt"}), h("meta", {attributes: {charset: "utf8"}}), h.fragment(...props.authors.map((a) => h("meta", {name: "author", content: a.name}))), h("title", {}, props.pagetitle), h("script", {type: "module"}, props.script), h("style", {}, props.style)), h("body", {}, h("form", {class: "ublatt"}, props.header, h("div", {class: "main"}, props.body), props.footer))));
+}
+
+// src/shared/templates/header.ts
+function header_default(props) {
+  return (h) => h("div", {class: "head"}, h.when(props.title, () => h("span", {class: "title"}, props.title)), h.when(props.subtitle, () => h("span", {class: "term"}, props.subtitle)), h("ul", {class: "lecturers"}, ...(props.authors || []).map((a) => h("li", {}, a.name))), h.when(props.sheet, () => h("span", {class: "sheetnum"}, `${props.sheet}. \xDCbungsblatt`)), h.when(props.date, () => h.fragment(h("span", {class: "issued-title"}, "Ausgabe: "), h("span", {class: "issued"}, props.date))), h.when(props.due, () => h.fragment(h("span", {class: "due-title"}, "Abgabe: "), h("span", {class: "due"}, props.due))));
+}
+
+// src/shared/templates/submit.ts
+function submit_default(props) {
+  return (\u00B5) => \u00B5("div", {class: "submit"}, \u00B5("div", {}, \u00B5("h1", {}, "Autoren"), \u00B5("div", {class: "authors"})), \u00B5("div", {}, \u00B5("h1", {}, "Abgabe"), \u00B5("p", {}, "Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure L\xF6sung. Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail."), \u00B5("div", {class: "buttons", id: props.buttons})));
+}
+
+// src/cli/render.ts
+var voidTags = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr"
+]);
+var renderer = Object.assign(function(k, props, ...children) {
+  const attrs2 = Object.entries(props).map(([k2, v]) => {
+    switch (k2) {
+      case "attributes":
+        return Object.entries(v).map(([k3, v2]) => `${k3}="${v2}"`).join(" ");
+      case "data":
+        return Object.entries(v).map(([k3, v2]) => `data-${k3}="${v2}"`).join(" ");
+      case "class":
+        return `class="${Array.isArray(v) ? v.join(" ") : v}"`;
+      default:
+        return `${k2.toLowerCase()}="${v}"`;
+    }
+  }).join(" ");
+  if (children.length == 0 && voidTags.has(k)) {
+    return `<${k} ${attrs2}/>`;
+  } else {
+    return `<${k} ${attrs2}>
+${children.join("")}
+</${k}>`;
+  }
+}, {
+  fragment(...items) {
+    return items.join("");
+  },
+  fromString(v) {
+    return v;
+  },
+  empty() {
+    return "";
+  },
+  when(p, t) {
+    return p ? t() : "";
+  }
+});
+function render(template) {
+  return template(renderer);
+}
+
+// src/cli/build.ts
+import {buildParserFile} from "lezer-generator";
 async function build(options) {
   const dir = options.source == "stdin" ? "." : parse3(options.source).dir;
   const f = readFileSync2(options.source == "stdin" ? 0 : options.source).toString("utf-8");
@@ -184,6 +342,13 @@ async function build(options) {
     });
   }
   const markdown = extractMetadata(f, meta);
+  meta.author = meta.author || [];
+  var pagetitle = "";
+  if (meta["sheet"] !== void 0)
+    pagetitle += meta["sheet"].toString() + (meta.i18n?.["sheet-title"] || ". \xDCbungsblatt") + " - ";
+  pagetitle += meta["title"] || "ublatt";
+  if (meta["subtitle"])
+    pagetitle += " - " + meta["subtitle"];
   if (options.submission) {
     meta["authors"] = options.submission.authors;
   }
@@ -196,22 +361,19 @@ async function build(options) {
     `const ublatt = new Ublatt(document.querySelector('form.ublatt'),meta)`,
     `window.ublatt = ublatt`
   ];
-  meta["$css"] = ["./src/runtime/ublatt.css"];
   function findModules(base, modules2, classes, parent) {
     if (modules2.size > 0) {
       classes.forEach((c) => {
-        const module = modules2.get(c);
-        if (module) {
-          if (!imported.has(module)) {
-            imported.add(module);
-            imports.push(`import ${c.charAt(0).toUpperCase() + c.slice(1)} from '${base}/${c}'`);
+        const submodules = modules2.get(c);
+        if (submodules) {
+          const path4 = `${base}/${c}`;
+          if (!imported.has(path4)) {
+            imported.add(path4);
+            imports.push(`import ${c.charAt(0).toUpperCase() + c.slice(1)} from '${path4}'`);
             inits.push(`const ${c} = new ${c.charAt(0).toUpperCase() + c.slice(1)}()`);
             inits.push(`${parent}.registerModule('${c}',${c})`);
-            if (module.css) {
-              meta["$css"].push(base + "/" + c + ".css");
-            }
           }
-          findModules(base + "/" + c, module.submodules, classes, c);
+          findModules(base + "/" + c, submodules, classes, c);
         }
       });
     }
@@ -223,7 +385,7 @@ async function build(options) {
     },
     standalone: options.standalone
   });
-  meta["$body"] = md.render(markdown);
+  const body = md.render(markdown);
   const initArgs = [];
   if (options.submission) {
     const sub = options.submission;
@@ -235,7 +397,8 @@ async function build(options) {
     initArgs.push(JSON.stringify(solution));
   }
   inits.push(`ublatt.init(${initArgs.join(", ")})`);
-  const script = imports.join("; ") + ";" + inits.join("; ");
+  let script = imports.join("; ") + ";" + inits.join("; ");
+  let style = "";
   const bundle = await esbuild.build({
     stdin: {
       contents: script,
@@ -244,21 +407,34 @@ async function build(options) {
     bundle: true,
     platform: "browser",
     format: "esm",
+    outdir: options.dataDir + "/dist",
     write: false,
+    loader: {
+      ".woff": "dataurl",
+      ".svg": "dataurl"
+    },
     plugins: [
       {
-        name: "solid",
+        name: "externals",
         setup(build2) {
-          build2.onLoad({filter: /\.(t|j)sx$/}, async (args) => {
-            const source = await readFile2(args.path, {encoding: "utf8"});
-            const {name, ext} = parse4(args.path);
-            const filename = name + ext;
-            const res = await transformAsync(source, {
-              presets: [solid, ts],
-              filename,
-              sourceMaps: "inline"
-            });
-            return {contents: res?.code || void 0, loader: "js"};
+          build2.onResolve({filter: externals_default2.filter}, (args) => {
+            return {
+              external: true,
+              path: externals_default2.path(args.path)
+            };
+          });
+        }
+      },
+      {
+        name: "lezer",
+        setup(build2) {
+          build2.onLoad({filter: /\.grammar$/}, async (args) => {
+            const source = await readFile2(args.path, {encoding: "utf-8"});
+            const {parser} = buildParserFile(source, {});
+            return {
+              contents: parser,
+              loader: "js"
+            };
           });
         }
       }
@@ -267,61 +443,26 @@ async function build(options) {
   });
   bundle.warnings?.forEach(console.warn);
   if (bundle.outputFiles) {
-    meta["$script"] = bundle.outputFiles[0].text.replaceAll("</script>", "<\\/script>");
+    script = bundle.outputFiles[0].text.replaceAll("</script>", "<\\/script>");
+    style = bundle.outputFiles[1].text;
   }
-  meta["$css"] = meta["$css"].map((x) => {
-    let alt = x.replace("./src/runtime", "./dist");
-    if (existsSync3(options.dataDir + "/" + alt))
-      x = alt;
-    if (options.standalone) {
-      const p = options.dataDir + "/" + x;
-      let css = readFileSync2(p).toString("utf-8");
-      css = css.replaceAll(/url\(['"]?([a-zA-Z\.\/0-9_@-]+)['"]?\)/g, (x2, y) => {
-        const data = readFileSync2(parse3(p).dir + "/" + y).toString("base64");
-        let mime;
-        switch (parse3(y).ext) {
-          case ".woff":
-            mime = "font/woff";
-            break;
-          case ".png":
-            mime = "image/png";
-            break;
-          case ".jpg":
-            mime = "image/jpg";
-            break;
-          case ".svg":
-            mime = "image/svg+xml";
-            break;
-          default:
-            mime = "text/plain";
-            break;
-        }
-        return `url(data:${mime};base64,${data})`;
-      });
-      return `<style>
-${css}
-</style>`;
-    } else
-      return `<link rel="stylesheet" href="${x}"/>`;
-  });
   meta["$dir"] = "dist";
-  var pagetitle = "";
-  if (meta["sheet"] !== void 0)
-    pagetitle += meta["sheet"].toString() + (meta.i18n?.["sheet-title"] || ". \xDCbungsblatt") + " - ";
-  pagetitle += meta["title"] || "ublatt";
-  if (meta["subtitle"])
-    pagetitle += " - " + meta["subtitle"];
-  meta["$pagetitle"] = pagetitle;
-  const footerTemplateSrc = readFileSync2(options.dataDir + "/templates/submit.html").toString("utf-8");
-  const footerTemplate = handlebars.compile(footerTemplateSrc);
-  if (!options.submission)
-    meta["$footer"] = footerTemplate(meta);
-  const templateSrc = readFileSync2(options.dataDir + "/templates/ublatt.html").toString("utf-8");
-  const template = handlebars.compile(templateSrc);
+  const footer = render((\u00B5) => \u00B5.when(!options.submission, () => submit_default({buttons: "submit-buttons"})(\u00B5)));
+  meta.authors = meta.authors || meta.author.map((x) => ({name: x}));
+  const output = render(main_default({
+    lang: meta.lang,
+    authors: meta.authors || [],
+    pagetitle,
+    header: render(header_default(meta)),
+    body,
+    script,
+    style,
+    footer
+  }));
   if (options.out == "stdout") {
-    process.stdout.write(template(meta));
+    process.stdout.write(output);
   } else {
-    writeFileSync(options.out, template(meta));
+    writeFileSync(options.out, output);
   }
 }
 
@@ -331,14 +472,14 @@ import {
   readdirSync as readdirSync2
 } from "fs";
 import {
-  parse as parse5
+  parse as parse4
 } from "path";
 function summary(options) {
   let course = null;
   const sheets = {};
   const students = {};
   const handins = {};
-  readdirSync2(options.dir).filter((x) => parse5(x).ext == ".json").map((x) => {
+  readdirSync2(options.dir).filter((x) => parse4(x).ext == ".json").map((x) => {
     const src = readFileSync3(options.dir + x).toString("utf-8");
     const obj = JSON.parse(src);
     if (course == null) {
@@ -385,18 +526,19 @@ import {
 } from "fs";
 function evaluate(options) {
   function makeBuildOptions(s) {
-    const y = readdirSync3("./solutions").map((x) => JSON.parse(readFileSync4("./solutions/" + x).toString("utf-8"))).find((x) => x.sheet == s.sheet);
-    const z = readdirSync3("./sheets").map((x) => "./sheets/" + x).find((x) => {
+    const opts = Object.assign({}, options);
+    const y = readdirSync3("./solutions").filter((x) => x.endsWith(".json")).map((x) => JSON.parse(readFileSync4("./solutions/" + x).toString("utf-8"))).find((x) => x.sheet == s.sheet);
+    const z = readdirSync3("./sheets").filter((x) => x.endsWith(".md")).map((x) => "./sheets/" + x).find((x) => {
       const meta = {};
       extractMetadata(readFileSync4(x).toString("utf-8"), meta);
       return meta.sheet == s.sheet;
     });
-    options.submission = s;
-    options.solution = y;
+    opts.submission = s;
+    opts.solution = y;
     if (!z)
       throw new Error("could not find sheet");
-    options.source = z;
-    return options;
+    opts.source = z;
+    return opts;
   }
   if (statSync(options.file).isDirectory()) {
     const counters = {};
@@ -473,3 +615,4 @@ yargs(argv.slice(2)).scriptName("ublatt").options({
     hidden: true
   }
 }), evaluate).demandCommand().help().argv;
+//# sourceMappingURL=ublatt.js.map

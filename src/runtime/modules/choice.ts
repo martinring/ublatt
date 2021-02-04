@@ -1,3 +1,4 @@
+import './choice.css';
 import { Exercise, ExerciseType, Eval } from "../Types";
 
 function renderList(elems: Iterable<Node>): DocumentFragment {
@@ -49,7 +50,7 @@ export default class Choice implements ExerciseType<boolean[] | boolean[][]> {
           return span
         })
 
-        const grouped = container.classList.contains('grouped')
+        const grouped = elem.classList.contains('grouped')
         
         const rheaders = Array.from(container.querySelectorAll("tbody > tr > td:first-child")).map((e,i) => {          
           const div = document.createElement('div')
@@ -93,7 +94,7 @@ export default class Choice implements ExerciseType<boolean[] | boolean[][]> {
       } else {        
         throw new Error('choice does not contain ul, ol or table element')
       }
-    } else {
+    } else {      
       throw new Error('choice does not contain ul, ol or table element')
     }
 }
@@ -167,7 +168,7 @@ export default class Choice implements ExerciseType<boolean[] | boolean[][]> {
             get: () => cb.checked,
             set: (o: boolean) => cb.checked = o
           }
-        })
+        })        
         return {
           get: () => choices.map((x) => x.get()),
           set: (x: boolean[] | boolean[][]) => 

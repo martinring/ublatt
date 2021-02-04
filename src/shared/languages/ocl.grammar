@@ -1,0 +1,17 @@
+@top OCL { Keyword | ControlKeyword | IntegerLiteral }
+
+@tokens {
+  Keyword { 
+    "and" | "attr" | "body" | "context" | "def" |  
+    "endpackage" | "in" | "inv" |  "let" | "oper" | 
+    "package" | "post" | "pre" | "@pre" | "true" | "false" | "self"
+  }
+
+  ControlKeyword {
+    "else" | "endif" | "if" | "implies" |  "not" | "or" | "then" | "xor"
+  }
+
+  IntegerLiteral {
+    $[1-9] $[0-9]* 
+  }
+}

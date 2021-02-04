@@ -25,25 +25,30 @@ form.ublatt > .main > section > ol > li:before {
   left: -1.6em;
 }
 
-body:not(.email) form.ublatt {
-  background-color: #fff;
+form.ublatt {
   display: block;
-  margin: auto;
-  width: 55rem;
-  box-shadow: 0.1rem 0.1rem 1rem #ddd;  
-  margin: 2rem auto;  
-  counter-reset: figure;
-  padding: 2rem 3rem;
+}
+
+@media only screen and (min-width: 56rem) {
+  form.ublatt {
+    background-color: #fff;
+    margin: auto;
+    max-width: 55rem;
+    box-shadow: 0.1rem 0.1rem 1rem #ddd;  
+    margin: 2rem auto;  
+    counter-reset: figure;
+    padding: 2rem 3rem;
+  }  
 }
 
 form.ublatt {
   font-family: 'TeXGyrePagella', sans-serif;
 }
 
-body:not(.email) form.ublatt::before {
+form.ublatt::before {
   display: block;
   height: 5rem;
-  content: '';
+  content: '';  
   background-image: url("images/logo.svg");
   background-size: auto 2.7rem;
   background-position: 3rem 1rem;

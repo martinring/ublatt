@@ -58,19 +58,14 @@
     margin-bottom: 0;
 }
 
-.input>.editor:empty::after {
-    content: ' ';
-  }
-
 .input>.editor {
-    font-family: 'JetBrains Mono';    
-    padding: 0.5rem;
-    resize: none !important;  
     background: #eee;  
 }
 
 .input:not(.rendered)>.editor {
-    border: 0.05rem solid #000;    
+    border: 0.05rem solid #000;
+    border-radius: 0.2rem;
+    overflow: hidden;
 }
 
 .input.rendered>.editor {

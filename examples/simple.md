@@ -7,4 +7,4 @@ date: 15.12.2020
 
 Hallo
 
-[]{.input .ocl}
+[]{.input .math}

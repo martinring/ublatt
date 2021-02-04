@@ -1,11 +1,25 @@
 import { InputMode } from '../input'
+import { lineNumbers } from '@codemirror/gutter'
+
+import { parser } from '../../../shared/languages/ocl.grammar';
+import { LezerLanguage } from '@codemirror/language';
+import { styleTags, tags as t } from "@codemirror/highlight";
 
 export default class OCL implements InputMode {
-    language = {
-      indentOn: /(:|\b(and|or|not|implies))\s*$/
-    }
-
-    highlight(code: HTMLElement) {
-        code.innerHTML = code.textContent?.replace(/\b(context|def|inv|pre|post|self|if|then|else|endif|let|in|implies|and|not|or)\b/g, '<span class="keyword">$1</span>') || ""        
-    }
+  language = [
+    lineNumbers(),
+    LezerLanguage.define({
+      parser: parser.configure({
+        props: [
+          styleTags({
+            Keyword: t.keyword,
+            ControlKeyword: t.controlKeyword,
+            IntegerLiteral: t.number
+          })
+        ]
+      }),
+      languageData: {        
+      }
+    })
+  ]
 }

@@ -12,7 +12,7 @@
         "resolveJsonModule": true
     },
     "references": [
-        { "path": "../shared" }        
+        { "path": "../shared" }
     ],
     "typeAcquisition": {
         "enable": true
