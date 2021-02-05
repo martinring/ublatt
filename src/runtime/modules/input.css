@@ -109,8 +109,16 @@
     z-index: 1000;
 }
 
-.input>.help::before {
-    content: 'ⓘ'
+@media only print {
+    .input>.help {
+        display: none;
+    }
+}
+
+.input>.help:not(:hover):before {
+    font-family: 'icons';
+    font-size: 1rem;
+    content: 'ⓘ';
 }
 
 .input>.help:hover::before {

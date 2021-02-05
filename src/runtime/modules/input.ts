@@ -50,7 +50,7 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
       if (inputMode.name) {          
         let help = document.createElement('div')
         help.classList.add('help')
-        help.dataset["name"] = tpe      
+        help.dataset["name"] = tpe
         let link = document.createElement('a')
         link.target = '_blank'
         link.innerHTML = inputMode.name
@@ -68,6 +68,9 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
         history(), keymap.of(historyKeymap),        
         defaultHighlightStyle,
         EditorView.theme({
+          $$focused: {
+            outline: 'none'
+          },
           $scroller: {
             fontFamily: 'JetBrains Mono',
             fontSize: '80%'            

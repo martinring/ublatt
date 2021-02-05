@@ -20,6 +20,12 @@ yargs(process.argv.slice(2))
       description: "path to meta yaml file",
       default: [] as string[],
       global: true,
+    },
+    debug: {
+      type: "boolean",
+      description: "include original sources for debugging",
+      default: false,
+      global: true
     }
   })
   .command(

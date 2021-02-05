@@ -22,7 +22,8 @@ export type BuildOptions = {
   submission?: Solution,
   solution?: Solution,
   standalone: boolean,
-  dataDir: string
+  dataDir: string,
+  debug: boolean
 }
 
 export default async function build(options: BuildOptions) {
@@ -112,19 +113,25 @@ export default async function build(options: BuildOptions) {
 
     inits.push(`ublatt.init(${initArgs.join(", ")})`) 
 
-    let script: string = imports.join("; ") + ";" + inits.join("; ")  
+    let script: string = imports.join(";\n") + ";" + inits.join(";\n")  
     let style: string = ''     
 
     const bundle = await esbuild.build({
       stdin: {
         contents: script,
-        resolveDir: options.dataDir
+        resolveDir: options.dataDir,
+        sourcefile: 'init.ts'
       },
       bundle: true,
       platform: "browser",
       format: 'esm',
       outdir: options.dataDir + '/dist',
       write: false,
+      target: 'es2018',
+      charset: 'utf8',
+      color: true,
+      sourcemap: options.debug? 'inline' : false,
+      sourcesContent: options.debug,
       loader: {
         '.woff': 'dataurl',
         '.svg': 'dataurl'        
@@ -155,7 +162,7 @@ export default async function build(options: BuildOptions) {
             })
           }
         }],
-      minify: true
+      minify: !options.debug
     })
 
     bundle.warnings?.forEach(console.warn)        

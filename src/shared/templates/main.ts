@@ -17,7 +17,7 @@ export default function <T extends Renderer> (props: {
       h('html',{ lang: props.lang },  
         h('head',{},
           h('meta', { name: 'generator', content: 'ublatt' }),          
-          h('meta', { attributes: { charset: 'utf8' }}),
+          h('meta', { attributes: { charset: 'utf-8' }}),
           h.fragment(...props.authors.map(a => h('meta',{ name: 'author', content: a.name }))),
           h('title',{},props.pagetitle),
           h('script',{ type: 'module' },props.script),

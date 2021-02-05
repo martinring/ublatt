@@ -2,10 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url('https://fonts.cdnfonts.com/css/tex-gyre-pagella');
 @import url('./icons/icons.css');
-@import url('./prism.css');
 
 body {
   background-color: #fff;
+  margin: 0;
 }
 
 form.ublatt > .main > section > ol {
@@ -29,12 +29,12 @@ form.ublatt {
   display: block;
 }
 
-@media only screen and (min-width: 56rem) {
+@media only screen and (min-width: 61rem) {
   form.ublatt {
     background-color: #fff;
     margin: auto;
     max-width: 55rem;
-    box-shadow: 0.1rem 0.1rem 1rem #ddd;  
+    box-shadow: 0.1rem 0.1rem 0.5rem #aaa;  
     margin: 2rem auto;  
     counter-reset: figure;
     padding: 2rem 3rem;
@@ -43,17 +43,22 @@ form.ublatt {
 
 form.ublatt {
   font-family: 'TeXGyrePagella', sans-serif;
+  color-adjust: exact;
 }
 
 form.ublatt::before {
   display: block;
-  height: 5rem;
-  content: '';  
+  height: 3.6rem;
+  font-family: Arial, Helvetica, sans-serif;
+  content: 'Universtität Bremen';  
   background-image: url("images/logo.svg");
   background-size: auto 2.7rem;
   background-position: 3rem 1rem;
   background-repeat: no-repeat;
   border-bottom: 0.0667rem solid black;
+  padding-left: 6.2rem;
+  font-size: 1.4rem;
+  padding-top: 1.4rem;
 }
 
 form.ublatt .head {
@@ -88,7 +93,7 @@ form.ublatt .head .lecturers {
   list-style: none;
 }
 form.ublatt .head .lecturers li {
-  margin: none;
+  margin: 0;
 }
 form.ublatt .head .sheetnum {
   grid-row: 2;
@@ -419,12 +424,41 @@ code span.wa { /* Warning */
 }
 
 .submit {
-  background: #eee;
+  position: relative;
+  background-color: #eee;
   margin: 2rem -3rem -2rem -3rem;
-  padding: 0 3rem 2rem 3rem;
+  padding: 0 6rem 2rem 6rem;
   display: flex;
   flex-direction: row;  
   justify-content: space-between;
+}
+
+@media only print {
+  .submit {
+    display: none !important;
+  }
+}
+
+
+.submit::before {
+  content: '';
+  position: absolute;
+  top: -.1rem;
+  left: 0;
+  right: 0;
+  display: block;  
+  border-top: .2rem dotted #333;  
+}
+
+.submit::after {
+  color: #333;
+  position: absolute;
+  font-size: 2rem;
+  top: -1.2rem;
+  right: .5rem;
+  content: '✂';
+  font-family: 'icons';
+  transform: rotate(-90deg);
 }
 
 .submit > div:not(:first-child) {
@@ -441,14 +475,15 @@ code span.wa { /* Warning */
   text-align: left;
   line-height: 1.5rem;
   white-space: nowrap;
+  min-width: 20rem;
 }
 
 .submit table.authors th, .submit table.authors td {
-  padding: .25rem 0 .25rem .5rem;
+  padding: .25rem 0 .25rem .75rem;
 }
 
 .submit table.authors th:last-child, .submit table.authors td:last-child {
-  padding: .25rem 0.5rem;
+  padding: .25rem 0.75rem;
 }
 
 a {
@@ -463,7 +498,7 @@ a:hover {
   text-align: left;
   font-size: 1rem;
   display: block;  
-  font-family: 'TeXGyrePagella' sans-serif;
+  font-family: 'TeXGyrePagella', sans-serif;
   width: auto;
 }
 
@@ -491,7 +526,6 @@ a:hover {
 }
 
 .icon.large {
-  display: inline-block;
   line-height: 2rem;
   vertical-align: middle;  
 }

@@ -58,9 +58,9 @@ export default class implements Ublatt {
     const self = this
     render(µ => 
       document.getElementById('submit-buttons')?.append(
-        µ('a',{ class: ['icon','large'], events: { click: () => self.save() } },µ('i',{ class: 'icon-popout' }), ' Speichern'),
-        µ('a',{ class: ['icon','large'], events: { click: () => self.load() } },µ('i',{ class: 'icon-popin' }), ' Laden'),
-        µ('a',{ class: ['icon','large'], events: { click: () => self.clearSheet() } },µ('i',{ class: 'icon-trashcan' }), ' Leeren')
+        µ('a',{ class: ['icon','large'], events: { click: () => self.save() } },µ('i',{}, '💾'), ' Speichern'),
+        µ('a',{ class: ['icon','large'], events: { click: () => self.load() } },µ('i',{}, '📂'), ' Laden'),
+        µ('a',{ class: ['icon','large'], events: { click: () => self.clearSheet() } },µ('i',{}, '🗑'), ' Leeren')
       )
     )
     if (this.exerciseTypes.size == 0) {

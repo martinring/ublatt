@@ -171,7 +171,7 @@ var files = [
   "dist/*"
 ];
 var main = "dist/ublatt.js";
-var version = "1.3.1";
+var version = "1.4.0";
 var description = "An interactive exercise sheet generator";
 var homepage = "https://github.com/martinring/ublatt";
 var license = "MIT";
@@ -211,9 +211,9 @@ var dependencies = {
   mermaid: "8.9.0",
   prismjs: "1.21.0",
   punycode: "^2.1.1",
-  "source-map-support": "0.5.19",
   yaml: "^1.10.0",
-  yargs: "^16.2.0"
+  yargs: "^16.2.0",
+  "source-map-support": "^0.5.19"
 };
 var devDependencies = {
   "@types/babel__core": "^7.1.12",
@@ -256,7 +256,7 @@ var externals_default2 = {
 
 // src/shared/templates/main.ts
 function main_default(props) {
-  return (h) => h.fragment(h.fromString("<!DOCTYPE html>"), h("html", {lang: props.lang}, h("head", {}, h("meta", {name: "generator", content: "ublatt"}), h("meta", {attributes: {charset: "utf8"}}), h.fragment(...props.authors.map((a) => h("meta", {name: "author", content: a.name}))), h("title", {}, props.pagetitle), h("script", {type: "module"}, props.script), h("style", {}, props.style)), h("body", {}, h("form", {class: "ublatt"}, props.header, h("div", {class: "main"}, props.body), props.footer))));
+  return (h) => h.fragment(h.fromString("<!DOCTYPE html>"), h("html", {lang: props.lang}, h("head", {}, h("meta", {name: "generator", content: "ublatt"}), h("meta", {attributes: {charset: "utf-8"}}), h.fragment(...props.authors.map((a) => h("meta", {name: "author", content: a.name}))), h("title", {}, props.pagetitle), h("script", {type: "module"}, props.script), h("style", {}, props.style)), h("body", {}, h("form", {class: "ublatt"}, props.header, h("div", {class: "main"}, props.body), props.footer))));
 }
 
 // src/shared/templates/header.ts
@@ -266,7 +266,7 @@ function header_default(props) {
 
 // src/shared/templates/submit.ts
 function submit_default(props) {
-  return (\u00B5) => \u00B5("div", {class: "submit"}, \u00B5("div", {}, \u00B5("h1", {}, "Autoren"), \u00B5("div", {class: "authors"})), \u00B5("div", {}, \u00B5("h1", {}, "Abgabe"), \u00B5("p", {}, "Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure L\xF6sung. Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail."), \u00B5("div", {class: "buttons", id: props.buttons})));
+  return (\u00B5) => \u00B5("div", {class: "submit"}, \u00B5("div", {}, \u00B5("h1", {}, "Abgabe"), \u00B5("p", {}, "Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure L\xF6sung. Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail."), \u00B5("div", {class: "buttons", id: props.buttons})), \u00B5("div", {}, \u00B5("h1", {}, "Autoren"), \u00B5("div", {class: "authors"})));
 }
 
 // src/cli/render.ts
@@ -397,18 +397,24 @@ async function build(options) {
     initArgs.push(JSON.stringify(solution));
   }
   inits.push(`ublatt.init(${initArgs.join(", ")})`);
-  let script = imports.join("; ") + ";" + inits.join("; ");
+  let script = imports.join(";\n") + ";" + inits.join(";\n");
   let style = "";
   const bundle = await esbuild.build({
     stdin: {
       contents: script,
-      resolveDir: options.dataDir
+      resolveDir: options.dataDir,
+      sourcefile: "init.ts"
     },
     bundle: true,
     platform: "browser",
     format: "esm",
     outdir: options.dataDir + "/dist",
     write: false,
+    target: "es2018",
+    charset: "utf8",
+    color: true,
+    sourcemap: options.debug ? "inline" : false,
+    sourcesContent: options.debug,
     loader: {
       ".woff": "dataurl",
       ".svg": "dataurl"
@@ -439,7 +445,7 @@ async function build(options) {
         }
       }
     ],
-    minify: true
+    minify: !options.debug
   });
   bundle.warnings?.forEach(console.warn);
   if (bundle.outputFiles) {
@@ -565,6 +571,12 @@ yargs(argv.slice(2)).scriptName("ublatt").options({
     type: "array",
     description: "path to meta yaml file",
     default: [],
+    global: true
+  },
+  debug: {
+    type: "boolean",
+    description: "include original sources for debugging",
+    default: false,
     global: true
   }
 }).command("build [source]", "generate interactive exercise sheets", (argv2) => {

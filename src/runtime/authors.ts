@@ -43,7 +43,7 @@ export function Authors(elem: Element, authors: Student[] = []) {
       µ('table', { class: 'authors' },
         µ('thead', {},
           µ('tr', {},
-            µ('th', {}),
+            µ('th', {}, "#"),
             µ('th', {}, "Name"),
             µ('th', {}, "Matrikelnummer"),
             µ('th', {}, "Email")
@@ -52,8 +52,8 @@ export function Authors(elem: Element, authors: Student[] = []) {
         tbody
       ),
       µ('p', { class: 'center' },
-        µ('a', { class: 'icon', events: { click: () => addAuthor(authorViews.length, { name: '', matriculation_number: '', email: '' }) } }, µ('i', { class: 'icon-plus' })),
-        µ('a', { class: 'icon', events: { click: () => removeAuthor() } }, µ('i', { class: 'icon-minus' }))
+        µ('a', { class: 'icon', events: { click: () => addAuthor(authorViews.length, { name: '', matriculation_number: '', email: '' }) } }, µ('i', {}, '➕')),
+        µ('a', { class: 'icon', events: { click: () => removeAuthor() } }, µ('i',{},'➖'))
       )
     )
 
