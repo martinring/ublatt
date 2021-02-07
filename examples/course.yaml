@@ -1,4 +1,7 @@
 title: ublatt Exercise Sheet Generator
 subtitle: © 2021
+sheets: 'sheets/*.md'
+submissions: 'submissions/*.json'
+solutions: 'solutions/*.json'
 author:
   - Martin Ring

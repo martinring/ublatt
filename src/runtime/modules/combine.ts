@@ -1,8 +1,37 @@
+import './combine.css'
 import { Exercise, ExerciseType, Eval } from '../Types';
 
 export default class Combine implements ExerciseType<number[]> {
-    public eval(elem: Element, name: string, value: Eval<number[]>): Element {        
-        throw new Error('not implemented')
+    public eval(elem_: Element, name: string, value: Eval<number[]>): Element {        
+        const elem = elem_.cloneNode(true) as Element
+
+        let lefts = Array.from(elem.querySelectorAll<HTMLLIElement>('ul:first-child>li')).map(left => {
+            left.classList.add('left')
+            let placeholder = document.createElement('li')
+            placeholder.classList.add('placeholder')                        
+            left.insertAdjacentElement("afterend",placeholder);
+            return placeholder
+        })        
+
+        let rights = Array.from(elem.querySelectorAll<HTMLLIElement>('ul:last-child>li')).map((right,i) => {            
+            right.draggable = true
+            right.addEventListener('dragstart',function (e: DragEvent) {
+                e.dataTransfer?.setData('row',i.toString())
+            })
+            return right;
+        })
+                
+        value.submission.forEach((l,r) => {
+            let right = document.createElement('div') 
+            right.innerHTML = rights[r].innerHTML
+            if (l != Number.NaN && l != null) {
+                lefts[l].appendChild(right)
+            }
+        })
+
+        elem.querySelector<HTMLUListElement>('ul:last-child')?.remove()
+
+        return elem
     }
 
     public make(elem: Element, name: string): Exercise<number[]> {

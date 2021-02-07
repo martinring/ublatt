@@ -11,5 +11,5 @@ ublatt is an interactive exercise sheet generator.
 ## run
 
 ````bash
-> ublatt [input.md] [--meta course.yaml]
+> ublatt [input.md] [--meta course.yaml] [--out output.html]
 ````

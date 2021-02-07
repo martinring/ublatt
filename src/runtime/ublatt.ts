@@ -92,6 +92,12 @@ export default class implements Ublatt {
       points.contentEditable = 'true'      
       let totalPoints = 0
       let reachedPoints = 0
+      points.addEventListener('input', () => {
+        const ps = points.innerText.match(/([0-9]+([,\.][0-9]+)?) von/)
+        if (ps) {
+          reachedPoints = Number.parseFloat(ps[1].replace(',','.'))
+        }
+      })
       function updatePoints() {
         updateSheetPoints()
         points.innerHTML = `${reachedPoints} von ${totalPoints} Punkten`        
@@ -261,8 +267,7 @@ export default class implements Ublatt {
     this.exerciseTypes.set(name, module)
   }
 
-  public emailify() {
-    document.body.innerHTML = document.body.innerHTML;
+  public emailify() {    
     for (const script of Array.from(document.getElementsByTagName('script'))) {      
       script.remove()
     }

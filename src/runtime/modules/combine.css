@@ -10,6 +10,7 @@
 }
 
 .combine>ul:first-child {
+    padding-left: 0;
     grid-column: 1;
     display: grid;
     grid-template-columns: max-content auto;
@@ -24,14 +25,18 @@
     position: relative;
     padding: 0 1rem;
     position: relative;
-    border-bottom: 1px solid #ddd;
     list-style: none;
 }
 
+
 .combine>ul:first-child>.placeholder {
     grid-column: 2;
-    border-bottom: 1px solid #ddd;
     list-style: none;
+}
+
+.combine>ul:first-child>.left:not(:nth-last-child(2)), 
+.combine>ul:first-child>.placeholder:not(:last-child) {
+    border-bottom: 1px solid #ddd;
 }
 
 .combine>ul:first-child>.placeholder.drag-over {
