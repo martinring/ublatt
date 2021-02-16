@@ -1,0 +1,19 @@
+@top Diagram { 
+  DiagramKind
+}
+
+BlockDefinitionDiagram {
+  "bdd"
+}
+
+RequirementDiagram {
+
+}
+
+r<term> { @extend[@name={term}]<simpleName, term> }
+
+@external tokens indentation from '.sysml.tokens.js' { indent, dedent, newline }
+
+@tokens {
+
+}

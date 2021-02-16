@@ -5,7 +5,7 @@ import { EditorView, keymap, ViewPlugin } from '@codemirror/view';
 import { EditorState, Extension } from '@codemirror/state';
 import { standardKeymap } from '@codemirror/commands';
 import { history, historyKeymap } from '@codemirror/history';
-import { defaultHighlightStyle } from '@codemirror/highlight';
+import highlightStyle from '../../shared/codemirror/highlight';
 
 export interface InputMode {
   render?(code: string, elem: HTMLElement, name: string): void
@@ -66,7 +66,7 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
       const setup: Extension[] = [
         keymap.of(standardKeymap),
         history(), keymap.of(historyKeymap),        
-        defaultHighlightStyle,
+        highlightStyle,
         EditorView.theme({
           $$focused: {
             outline: 'none'
@@ -76,7 +76,8 @@ export default class Input implements ExerciseType<string>, Modules<InputMode> {
             fontSize: '80%'            
           },
           $gutters: {
-            color: '#237893'
+            color: '#237893',
+            backgroundColor: "#fff"
           }          
         })
       ]

@@ -9,8 +9,12 @@ import Token from 'markdown-it/lib/token';
 import MarkdownIt from 'markdown-it';
 import * as fs from 'fs';
 import * as path from 'path';
+import highlightStyle from '../shared/codemirror/highlight';
+import { highlightTree, styleTags } from '@codemirror/highlight';
+import { Language } from '@codemirror/language';
+import languages from '../shared/codemirror/languages';
 
-interface MarkdownOptions {
+interface MarkdownOptions {    
     dir: string,
     processClasses?: (classes: string[]) => void,
     standalone?: boolean
@@ -43,7 +47,7 @@ export default class Markdown {
 
         if (options.processClasses) {
             const processClasses = options.processClasses
-            const renderAttrs = this.md.renderer.renderAttrs
+            const renderAttrs = this.md.renderer.renderAttrs            
             this.md.renderer.renderAttrs = function (tkn) {
                 if (tkn.attrs) {
                     const c = tkn.attrs.find(x => x && x[0] == "class")
@@ -57,28 +61,74 @@ export default class Markdown {
         } 
 
         this.md.renderer.rules.image = function (tokens, idx, opts, env, slf) {
-            const token = tokens[idx];
-            let src = token.attrGet('src')            
+            const token = tokens[idx];            
+            let src = token.attrGet('src')
             if (src && fs.existsSync(options.dir + '/' + src)) {
                 const mime = 'image/' + path.parse(src).ext.slice(1)
                 const uri = `data:${mime};base64,${fs.readFileSync(options.dir + '/' + src).toString('base64')}`
-                token.attrSet('src', uri)
+                token.attrSet('src', uri)                
             } else {
                 console.warn(src + " does not exist")
             }
-            return slf.renderToken(tokens,idx,opts)
+            return `<figure>${slf.renderToken(tokens,idx,opts)}<figcaption>${slf.renderInline(token?.children || [],opts,env)}</figcaption></figure>`
         }
 
-        this.md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
+        this.md.renderer.rules.fence = function (tokens, idx, options, env: { highlighters: { [key: string]: Language } }, slf) {
             const token = tokens[idx];
-            token.attrJoin('class',token.info)            
+            let str = token.content
+            if (str.slice(-1) == '\n') str = str.slice(0,-1)
+            const m = token.info.match(/\S+/)
+            token.attrJoin('class',token.info)
+            let res = '<div class="line">'                
+            const newline = "</div><div class='line'>"                
+            if (m && m[0] && env.highlighters[m[0]]) {
+                const lang = env.highlighters[m[0]]
+                let i = 0                
+                highlightTree(lang.parseString(str),highlightStyle.match,
+                    (from,to,classes) => {
+                        if (i < from)
+                            res += str.slice(i,from).replaceAll('\n',newline)
+                        res += `<span class="${classes}">`
+                        res += str.slice(from,to).replaceAll('\n',`</span>${newline}<span class=${classes}>`)
+                        res += '</span>'
+                        i = to
+                    }
+                )
+                res += str.slice(i).replaceAll('\n',newline)                
+            } else {
+                res += str.replaceAll('\n',newline)
+            }   
+            
+            res += '</div>'            
+        
             return '<pre' + slf.renderAttrs(token) + '>'
-                + '<code>' + token.content + '</code>'
-                + '</pre>';            
+                + '<code>' + res + '</code>'
+                + '</pre>';
         }
     }
 
-    public render(input: string): string {
-        return this.md.render(input)
+    public async render(input: string): Promise<string> {
+        const env: { highlighters: { [key: string]: Language } } = {
+            highlighters: {}
+        }
+        const parse = this.md.parse(input,env)        
+        const extractLanguages = async (tkn: Token) => {
+            if (tkn.type == 'fence') {
+                const m = tkn.info.match(/\S+/)
+                if (m && m[0]) {
+                    if (languages[m[0]])
+                      env.highlighters[m[0]] = await languages[m[0]]()
+                }
+                return
+            } else {             
+                if (tkn.children) {
+                    await Promise.all(tkn.children.map(extractLanguages))
+                }                
+                return
+            }
+        }        
+        await Promise.all(parse.map(extractLanguages))
+        const res = this.md.renderer.render(parse,this.md.options,env)
+        return res
     }
 }

@@ -1,6 +1,5 @@
 import { RuntimeRenderer, Props, HTML, RVar } from "../shared/templates/template";
 
-
 const renderer: RuntimeRenderer = 
   Object.assign(
     function <K extends HTML>(k: K, props: { [X in keyof Props<K>]: Props<K>[X] | RVar<Props<K>[X]> }, ...children: (Node | string)[]): HTMLElementTagNameMap[K] {
@@ -50,7 +49,7 @@ const renderer: RuntimeRenderer =
         return fragment
       },
       
-      when(p: any, t: () => string | Node) {        
+      when<T>(p: any, t: () => string | Node) {        
         if (p) {
           const x = t()
           if (typeof x == 'string') {

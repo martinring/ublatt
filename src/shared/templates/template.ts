@@ -30,27 +30,31 @@ export type Props<T extends HTML> =
     events?: Partial<{ [K in keyof HTMLElementEventMap]: (this: HTMLElementTagNameMap[T], e: HTMLElementEventMap[K]) => void }>
   }
 
+type FragmentTag = never
+type EmptyTag = never
+type Tagged<_K extends HTML | FragmentTag, V> = V
+
 export type Renderer = {
-  <K extends HTML>(k: K, props: Props<K>, ...children: string[]): any
-  when(p: any, t: () => string): any
-  empty(): any
-  fragment(...items: string[]): any
-  fromString(value: string): any
+  <K extends HTML>(k: K, props: Props<K>, ...children: string[]): Tagged<K,any>
+  when<T extends HTML | FragmentTag>(p: any, t: () => Tagged<T,string>): Tagged<T | EmptyTag,any>
+  empty(): Tagged<EmptyTag,any>
+  fragment(...items: string[]): Tagged<FragmentTag,any>
+  fromString(value: string): Tagged<HTML,any>
 }
 
-//export type Result<K extends HTML, T extends Renderer<K>> = ReturnType<T>
 export type Fragment<T extends Renderer> = ReturnType<T['fragment']>
+//export type Result<K extends HTML, T extends Renderer<K>> = ReturnType<T>
 //export type Empty<T extends Renderer<HTML>> = ReturnType<T['empty']>
 //export type Child<T extends Renderer<K>, K extends HTML> = Parameters<T>[2]
 //export type FragmentChild<T extends Renderer<HTML>> = Parameters<T['fragment']>[0]
 //export type Properties<T extends Renderer<K>, K extends HTML> = Parameters<T>[1]
 
 export interface RuntimeRenderer extends Renderer {
-  <K extends HTML>(k: K, props: { [X in keyof Props<K>]: Props<K>[X] | RVar<Props<K>[X]> }, ...children: (Node | string)[]): HTMLElementTagNameMap[K]
-  when(p: any, t: () => string | Node): Node
-  empty(): Node
-  fragment(...items: (string | Node)[]): DocumentFragment
-  fromString(value: string): DocumentFragment
+  <K extends HTML>(k: K, props: { [X in keyof Props<K>]: Props<K>[X] | RVar<Props<K>[X]> }, ...children: (Node | string)[]): Tagged<K,HTMLElementTagNameMap[K]>
+  when<T extends HTML | FragmentTag>(p: any, t: () => Tagged<T, string | Node>): Tagged<T | EmptyTag, DocumentFragment | Node | Text>
+  empty(): Tagged<EmptyTag,DocumentFragment>
+  fragment(...items: (string | Node)[]): Tagged<FragmentTag,DocumentFragment>
+  fromString(value: string): Tagged<FragmentTag,DocumentFragment>
 }
 
 export interface StaticRenderer extends Renderer {

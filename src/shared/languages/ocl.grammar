@@ -1,17 +1,300 @@
-@top OCL { Keyword | ControlKeyword | IntegerLiteral }
+@top ExpressionInOcl { packageDeclaration | contextDeclaration* }
+
+@precedence {
+  pre,
+  methodAccess @left,
+  propertyAccess @left,
+  unary,
+  times @left,
+  plus @left,
+  if,
+  compare @left,
+  equals @left,
+  and @left,
+  or @left,
+  xor @left,
+  implies @right,
+  in @left,
+  path @right  
+}
+
+packageDeclaration {
+  kw<"package"> pathName contextDeclaration* kw<"endpackage">
+}
+
+contextDeclaration {
+  propertyContextDecl |
+  classifierContextDecl |
+  operationContextDecl 
+}
+
+propertyContextDecl {
+  kw<"context"> pathName "::" PropertyName { simpleName } ":" type initOrDecValue
+}
+
+initOrDecValue {
+  (kw<"init"> | kw<"derive">) ":" OclExpression initOrDecValue?
+}
+
+classifierContextDecl {
+  kw<"context"> (simpleName ":")? pathName invOrDef
+}
+
+invOrDef {
+  kw<"inv"> simpleName? ":" OclExpression invOrDef ? |
+  kw<"static">? kw<"def"> simpleName? ":" defExpression invOrDef?
+}
+
+defExpression {
+  VariableDeclaration |
+  operation "=" OclExpression
+}
+
+operationContextDecl {
+  kw<"context"> operation prePostOrBodyDecl
+}
+
+prePostOrBodyDecl {
+  (kw<"pre"> | kw<"post"> | kw<"body">) simpleName ":" OclExpression
+  prePostOrBodyDecl?
+}
+
+operation {
+  pathName "::" MethodName { simpleName } "(" variableDeclarationList? ")" ":"
+  ~type type?
+}
+
+OclExpression { 
+  CallExp |
+  BinaryExp |  
+  VariableExp |
+  LiteralExp |
+  LetExp |
+  OclMessageExp |
+  IfExp
+}
+
+BinaryExp {
+  OclExpression !times("*" | "/") OclExpression |
+  OclExpression !plus ("+" | "-") OclExpression |
+  OclExpression !compare ("<" | ">" | "<=" | ">=") OclExpression |
+  OclExpression !equals ("=" | "<>") OclExpression |
+  OclExpression !and kw<"and"> OclExpression |
+  OclExpression !or (kw<"or"> | kw<"xor">) OclExpression |
+  OclExpression !implies kw<"implies"> OclExpression 
+}
+
+VariableExp {  
+  simpleName ~vardecl | kw<"self">
+}
+
+type {
+  pathName "::" Type { simpleName } |
+  Type { simpleName } |
+  collectionType |
+  tupleType |
+  primitiveType |
+  oclType
+}
+
+pathName {
+  Namespace { simpleName } |
+  pathName !path "::" Namespace { simpleName }
+}
+
+
+LiteralExp {
+  EnumLiteralExp |
+  CollectionLiteralExp |
+  TupleLiteralExp |
+  PrimitiveLiteralExp //|
+  //TypeLiteralExp
+}
+
+EnumLiteralExp {
+  pathName "::" EnumLiteral { simpleName }
+}
+
+CollectionLiteralExp {
+  collectionTypeIdentifier "{" CollectionLiteralParts "}"
+}
+
+collectionTypeIdentifier {
+  r<"Set"> |
+  r<"Bag"> |
+  r<"Sequence"> |
+  r<"Collection"> |
+  r<"OrderedSet">
+}
+
+collectionType {
+  collectionTypeIdentifier "(" type ")"
+}
+
+tupleType {
+  r<"Tuple"> "(" variableDeclarationList ")"
+}
+
+primitiveType {
+
+}
+
+oclType {
+  r<"OclAny"> |
+  r<"OclInvalid"> |
+  r<"OclMessage"> |
+  r<"OclVoid">
+}
+
+CollectionLiteralParts {
+  CollectionLiteralPart ("," CollectionLiteralParts)?
+}
+
+CollectionLiteralPart {
+  CollectionRange |
+  OclExpression
+}
+
+CollectionRange {
+  OclExpression ".." OclExpression
+}
+
+PrimitiveLiteralExp {
+  NumericLiteral |
+  StringLiteral |
+  BooleanLiteralExp |
+  NullLiteralExp |
+  InvalidLiteralExp
+}
+
+VariableDeclaration {
+  VariableName { simpleName } ~vardecl (":" type)? ("=" OclExpression)?
+}
+
+BooleanLiteralExp {
+  kw<"true"> | kw<"false">
+}
+
+NullLiteralExp {
+  kw<"null">
+}
+
+InvalidLiteralExp {
+  kw<"invalid">
+}
+
+TypeLiteralExp {
+  ""
+}
+
+TupleLiteralExp {
+  r<"Tuple"> "{" variableDeclarationList "}"
+}
+
+NumericLiteral {
+  "*" | integerLiteral | realLiteral
+}
+
+CallExp {
+  FeatureCallExp /*|
+  LoopExp*/
+}
+
+/*LoopExp {
+//  IteratorExp |
+//  IterateExp
+}
+
+IteratorExp {
+  OclExpression "->" MethodName "(" VariableDeclaration ("," VariableDeclaration)
+}*/
+
+variableDeclarationList {
+  VariableDeclaration ("," variableDeclarationList)?
+}
+
+FeatureCallExp {  
+  OperationCallExp |
+  PropertyCallExp
+}
+
+OperationCallExp {
+  OclExpression !methodAccess ("->" | ".") MethodName { simpleName isMarkedPre? 
+  } "(" (VariableDeclaration  ("," VariableDeclaration)? "|")? 
+  arguments ? ")"  
+
+  /*OclExpression !access "->" (MethodName isMarkedPre?) "(" arguments ? ")" |
+  OclExpression !access "." (MethodName isMarkedPre?) "(" arguments ? ")" |
+  OclExpression !access "." (PropertyName isMarkedPre?)*/
+}
+
+PropertyCallExp {
+  OclExpression !propertyAccess ("->" | ".") PropertyName { simpleName isMarkedPre? }
+}
+
+isMarkedPre {
+  !pre "@" kw<"pre">
+}
+
+arguments {
+  OclExpression ("," arguments)?
+}
+
+LetExp {
+  kw<"let"> variableDeclarationList !in kw<"in"> OclExpression
+}
+
+OclMessageExp {
+  OclExpression ("^" | "^^") simpleName "(" OclMessageArguments ")"
+}
+
+OclMessageArguments {
+  OclMessageArg ("," OclMessageArguments)?
+}
+
+OclMessageArg {
+  "?" (":" type) ? |
+  OclExpression
+}
+
+IfExp {
+  !if kw<"if"> OclExpression kw<"then"> OclExpression kw<"else"> OclExpression kw<"endif">
+}
+
+@skip {
+  whitespace | LineComment | BlockComment
+}
+
+kw<term> { @specialize[@name={term}]<simpleName, term> }
+
+r<term> { @extend[@name={term}]<simpleName, term> }
 
 @tokens {
-  Keyword { 
-    "and" | "attr" | "body" | "context" | "def" |  
-    "endpackage" | "in" | "inv" |  "let" | "oper" | 
-    "package" | "post" | "pre" | "@pre" | "true" | "false" | "self"
+  @precedence{
+    realLiteral,
+    integerLiteral,
+    LineComment,
+    "-"
   }
 
-  ControlKeyword {
-    "else" | "endif" | "if" | "implies" |  "not" | "or" | "then" | "xor"
-  }
+  whitespace { std.whitespace+ }
+  LineComment { "--" ![\n]* }  
+  BlockComment { "/*" blockCommentRest }
+  blockCommentRest { ![*/] blockCommentRest | "*" blockCommentAfterStar  }
+  blockCommentAfterStar { "/" | "*" blockCommentAfterStar | ![/*] blockCommentRest }
 
-  IntegerLiteral {
-    $[1-9] $[0-9]* 
+  simpleName { $[A-Za-z_$] $[A-Za-z0-9_$]* }  
+  integerPart { $[1-9] $[0-9]+ | $[0-9] }
+  exponentPart { $[eE] $[+\-]? integerPart }
+  fractionalPart { "." $[0-9]+ }
+  integerLiteral { integerPart }  
+  realLiteral { 
+    integerPart fractionalPart |
+    integerPart exponentPart |
+    integerPart fractionalPart exponentPart
+  }  
+
+  StringLiteral {
+    "'" (![\\'\n] | "\\" (![\n] | "\n"))* "'"
   }
 }

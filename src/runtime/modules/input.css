@@ -1,7 +1,6 @@
 .input {
     display: block;
-    position: relative;
-    color: #0022cc;
+    position: relative;    
 }
 
 
@@ -15,7 +14,6 @@
     width: calc(100% - 4rem);
     font-family: "TeX Gyre Pagella";
     display: block;
-    color: #0022cc;
     padding: 1rem 2rem;
     border: 0.05rem solid #ddd;
     transition: border-color 0.3s ease;
@@ -58,14 +56,10 @@
     margin-bottom: 0;
 }
 
-.input>.editor {
-    background: #eee;  
-}
-
-.input:not(.rendered)>.editor {
-    border: 0.05rem solid #000;
-    border-radius: 0.2rem;
+.input:not(.rendered)>.editor {    
     overflow: hidden;
+    border: 1px solid #ddd;
+    border-radius: .25rem;
 }
 
 .input.rendered>.editor {

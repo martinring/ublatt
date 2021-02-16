@@ -3,14 +3,23 @@
 @import url('https://fonts.cdnfonts.com/css/tex-gyre-pagella');
 @import url('./icons/icons.css');
 
+:root {
+  --text-color: #000;
+  --background: #fff;
+  --border-color: #999;
+  --border-width: 0.667rem;
+  --highlight-color: #00f;
+  --sheet-shadow: 
+}
+
 body {
   background-color: #fff;
   margin: 0;
 }
 
 form.ublatt > .main > section > ol {
-  counter-reset: list;
-  margin: 0;
+  counter-reset: list;  
+  margin: 0;  
 }
 
 form.ublatt > .main > section > ol > li {
@@ -26,10 +35,13 @@ form.ublatt > .main > section > ol > li:before {
 }
 
 form.ublatt {
+  font-family: 'TeXGyrePagella', sans-serif;
+  color-adjust: exact;
   display: block;
+  counter-reset: figure;
 }
 
-@media only screen and (min-width: 61rem) {
+@media only screen and (min-width: 60rem) {
   form.ublatt {
     background-color: #fff;
     margin: auto;
@@ -41,10 +53,6 @@ form.ublatt {
   }  
 }
 
-form.ublatt {
-  font-family: 'TeXGyrePagella', sans-serif;
-  color-adjust: exact;
-}
 
 form.ublatt::before {
   display: block;
@@ -53,16 +61,24 @@ form.ublatt::before {
   content: 'Universtität Bremen';  
   background-image: url("images/logo.svg");
   background-size: auto 2.7rem;
-  background-position: 3rem 1rem;
+  background-position: 1rem 1rem;
   background-repeat: no-repeat;
   border-bottom: 0.0667rem solid black;
-  padding-left: 6.2rem;
+  padding-left: 4.2rem;
   font-size: 1.4rem;
   padding-top: 1.4rem;
 }
 
+
+@media only screen and (min-width: 40rem) {
+  form.ublatt::before {
+    background-position: 3rem 1rem;
+    padding-left: 6.2rem;
+  }
+}
+
 form.ublatt .head {
-  margin: 1rem 3rem 3rem 3rem;
+  margin: 1rem;
   display: grid;
   grid-template-columns:
     [left] min-content
@@ -76,15 +92,25 @@ form.ublatt .head {
     [issued] min-content
     [due] min-content;
 }
+
+@media only screen and (min-width: 40rem) {
+  form.ublatt .head {
+    margin: 1rem 3rem;
+  }  
+}
+
+
 form.ublatt .head .title {
   grid-column: left / middle;
   grid-row: 1;
 }
+
 form.ublatt .head .term {
   margin: 0 1em;
   grid-column: middle;
-  grid-row: 1;
+  grid-row: 1;  
 }
+
 form.ublatt .head .lecturers {
   grid-column: right;
   grid-row: 1/3;
@@ -92,9 +118,11 @@ form.ublatt .head .lecturers {
   margin: 0;
   list-style: none;
 }
+
 form.ublatt .head .lecturers li {
   margin: 0;
 }
+
 form.ublatt .head .sheetnum {
   grid-row: 2;
   grid-column: left / end;
@@ -117,41 +145,32 @@ form.ublatt .head .due {
   grid-row: 4;
 }
 
-form.ublatt .issued-title, form.ublatt .due-title {
+form.ublatt .head .issued-title, form.ublatt .head .due-title {
   font-size: 1.2rem;
   line-height: 1.2;
   grid-column: left;
   font-weight: bold;
   padding-right: 1em;
 }
-form.ublatt .issued-title {
+form.ublatt .head .issued-title {
   grid-row: 3;
 }
 
-form.ublatt .due-title {
+form.ublatt .head .due-title {
   grid-row: 4;
 }
 
-form.ublatt .main, form.ublatt .greet {
-  margin: 1em 3rem;
+form.ublatt .main {
+  margin: 2rem 1rem;
 }
-form.ublatt .math.display {
-  display: block;
-  text-align: center;
-  margin: 16px;
+
+@media only screen and (min-width: 40rem) {
+  form.ublatt .main {
+    margin: 2rem 3rem;
+  }
+  
 }
-/*form.ublatt h1,
-form.ublatt h2,
-form.ublatt h3,
-form.ublatt h4,
-form.ublatt h5,
-form.ublatt h6 {
-  font-family: "Computer Modern Sans";
-}*/
-form.ublatt textarea {
-  padding: 8px;
-  width: calc(100% - 16px);
-}
+
 .row .column:first-child {
   padding-right: 8px;
 }
@@ -175,6 +194,29 @@ table {
   margin: auto;
   border-collapse: collapse;
 }
+
+.figures, .figures > p:first-child:last-child {
+  display: flex;  
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: end;
+}
+
+figure {
+  text-align: center;
+  margin: 1rem;
+}
+
+figure > figcaption {
+  margin-top: 0.5rem;
+}
+
+figure > figcaption::before {
+  counter-increment: figure;
+  content: 'Fig. ' counter(figure) ': ';
+  font-weight: bold;
+}
+
 /*.figure::after {
   margin-top: 0.5rem;
   font-size: 0.8em;
@@ -282,129 +324,37 @@ code {
   font-family: "JetBrains Mono";
 }
 
-pre code {
-  font-size: 0.8rem;
-  display: block;
-  padding: 1rem 2rem !important;
-  border: 0.05rem solid #ddd;
-  background-color: rgba(0,0,0,0.05);
-  border-radius: 0.2rem;  
+pre {
+  overflow-x: auto;
 }
 
-
-
-.code > .CodeMirror {
-  border: 0.05rem solid #ddd;
-  transition: border-color 0.3s ease;
+pre > code {
+  font-size: 0.8em;
+  display: table;
+  border-spacing: .5rem 0;
+  border-collapse: separate;  
+  line-height: 1.4;
+  counter-reset: line-numbers;   
 }
 
-.code > .CodeMirror:hover, .code > .CodeMirror.CodeMirror-focused {
-  border: 0.05rem solid #000;
+pre > code > .line {
+  display: table-row;
+  white-space: pre;  
 }
 
-.code > .CodeMirror .CodeMirror-lines {
-  padding: 1rem 0;
+pre.lineNumbers > code > .line::before {
+  counter-increment: line-numbers;
+  content: counter(line-numbers);
+  display: table-cell;  
+  border-right: 1px solid #ddd;
+  text-align: right;
+  padding-right: .25rem;
+  margin-right: .25rem;
+  color: #237893;
 }
 
-.code > .CodeMirror .CodeMirror-gutters {
-  min-width: 2rem;
-  background: none;
-  border-right: 0.05rem solid #ddd;
-}
-
-.code > .CodeMirror .CodeMirror-linenumber {
-  color: #2b91af;
-}
-
-code span.al { /* Alert */
-  color: #95da4c;
-}
-code span.an { /* Annotation */
-  color: #3f8058;
-}
-code span.at { /* Attribute */
-  color: #2980b9;
-}
-code span.bn { /* BaseN */
-  color: #f67400;
-}
-code span.bu { /* BuiltIn */
-  color: #7f8c8d;
-}
-code span.cf { /* ControlFlow */
-  color: #af00db;
-}
-code span.ch { /* Char */
-  color: #3daee9;
-}
-code span.cn { /* Constant */
-  color: #27aeae;
-}
-code span.co { /* Comment */
-  color: #008000;
-}
-code span.cv { /* CommentVar */
-  color: #7f8c8d;
-}
-code span.do { /* Documentation */
-  color: #a43340;
-}
-code span.dt { /* DataType */
-  color: #2980b9;
-}
-code span.dv { /* DecVal */
-  color: #09885a;
-}
-code span.er { /* Error */
-  color: #da4453;
-}
-code span.ex { /* Extension */
-  color: #0099ff;
-}
-code span.fl { /* Float */
-  color: #f67400;
-}
-code span.fu { /* Function */
-  color: #8e44ad;
-}
-code span.im { /* Import */
-  color: #27ae60;
-}
-code span.in { /* Information */
-  color: #c45b00;
-}
-code span.kw { /* Keyword */
-  color: blue;
-}
-code span.op { /* Operator */
-  color: #cfcfc2;
-}
-code span.ot { /* Other */
-  color: #27ae60;
-}
-code span.pp { /* Preprocessor */
-  color: #27ae60;
-}
-code span.re { /* RegionMarker */
-  color: #2980b9;
-}
-code span.sc { /* SpecialChar */
-  color: #3daee9;
-}
-code span.ss { /* SpecialString */
-  color: #da4453;
-}
-code span.st { /* String */
-  color: #800000;
-}
-code span.va { /* Variable */
-  color: #27aeae;
-}
-code span.vs { /* VerbatimString */
-  color: #da4453;
-}
-code span.wa { /* Warning */
-  color: #da4453;
+p + pre > code {
+  padding-top: 0;
 }
 
 .info {
@@ -425,12 +375,39 @@ code span.wa { /* Warning */
 
 .submit {
   position: relative;
-  background-color: #eee;
-  margin: 2rem -3rem -2rem -3rem;
-  padding: 0 6rem 2rem 6rem;
+  background-color: #eee;  
+  padding: 1rem;
+}
+
+.submit > .row {
   display: flex;
-  flex-direction: row;  
+  flex-direction: column;  
   justify-content: space-between;
+}
+
+.submit > .row p:first-child {
+  margin-top: 0;
+}
+
+@media only screen and (min-width: 40rem) {
+  .submit {
+    padding: 1rem 3rem;    
+  }
+
+  .submit > .row {
+    flex-direction: row; 
+  }
+
+  .submit > .row > div:not(:first-child) {
+    padding-left: 2rem;  
+  }
+}
+
+@media only screen and (min-width: 60rem) {
+  .submit {
+    margin: 2rem -3rem -2rem -3rem; 
+    padding: 1rem 6rem 2rem 6rem;
+  }
 }
 
 @media only print {
@@ -438,7 +415,6 @@ code span.wa { /* Warning */
     display: none !important;
   }
 }
-
 
 .submit::before {
   content: '';
@@ -454,21 +430,18 @@ code span.wa { /* Warning */
   color: #333;
   position: absolute;
   font-size: 2rem;
-  top: -1.2rem;
+  top: -1.1rem;
   right: .5rem;
   content: '✂';
   font-family: 'icons';
   transform: rotate(-90deg);
 }
 
-.submit > div:not(:first-child) {
-  padding-left: 2rem;  
-}
-
 .buttons {
   display: flex;
   flex-flow: row;
-  justify-content: space-evenly;
+  justify-content: center;
+  gap: 1rem
 }
 
 .submit table.authors {
@@ -526,6 +499,7 @@ a:hover {
 }
 
 .icon.large {
+  display: inline-block;
   line-height: 2rem;
   vertical-align: middle;  
 }
@@ -595,3 +569,20 @@ a:hover {
 .solution > .submission .mute, .solution > .feedback .mute {
   color: gray;
 }
+
+/*@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #222;    
+  } 
+
+  form.ublatt {
+    background-color: #222;
+    border: 0.0667rem solid #999;
+    box-shadow: none;
+    color: white;    
+  }
+
+  form.ublatt::before {
+    border-bottom-color: #999;
+  }
+}*/

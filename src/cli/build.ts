@@ -96,7 +96,7 @@ export default async function build(options: BuildOptions) {
       standalone: options.standalone
     })
 
-    const body: string = md.render(markdown);
+    const body: string = await md.render(markdown);
     
     const initArgs = []
     
@@ -165,11 +165,13 @@ export default async function build(options: BuildOptions) {
       minify: !options.debug
     })
 
-    bundle.warnings?.forEach(console.warn)        
+    bundle.warnings?.forEach(console.warn)    
 
     if (bundle.outputFiles) {
       script = bundle.outputFiles[0].text.replaceAll("</script>","<\\/script>")
       style = bundle.outputFiles[1].text
+    } else {
+      return
     }
 
     /*meta['$css'] = meta['$css'].map((x: string) => {

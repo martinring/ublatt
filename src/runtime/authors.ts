@@ -3,7 +3,7 @@ import render from './render';
 
 export function Authors(elem: Element, authors: Student[] = []) {
   return render(µ => {
-    const authorViews: ({ setIndex(i: number): void, get(): Student, remove(): void })[] = []
+    const authorViews: ({ setIndex(i: number): void, get(): Student, remove(): void, validate(): boolean})[] = []
     const tbody = µ('tbody', {})
 
     function addAuthor(i: number, s: Student) {
@@ -28,6 +28,11 @@ export function Authors(elem: Element, authors: Student[] = []) {
             matriculation_number: matnrField.textContent || '',
             email: emailField.textContent || ''
           }
+        },
+        validate() {
+          return (nameField.textContent || '').trim().length > 0 &&
+                 (matnrField.textContent || '').trim().length > 0 &&
+                 (emailField.textContent || '').trim().length > 0
         },
         remove() {
           row.remove()
@@ -64,7 +69,8 @@ export function Authors(elem: Element, authors: Student[] = []) {
       set: (v: Student[]) => {
         authorViews.splice(0, authorViews.length)
         v.forEach((s, i) => addAuthor(i, s))
-      }
+      },
+      validate: () => authorViews.length > 0 && authorViews.every(x => x.validate())
     }
   })
 }

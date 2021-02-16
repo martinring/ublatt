@@ -1,4 +1,75 @@
 #!/usr/bin/env node
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __commonJS = (callback, module) => () => {
+  if (!module) {
+    module = {exports: {}};
+    callback(module.exports, module);
+  }
+  return module.exports;
+};
+var __export = (target, all) => {
+  __markAsModule(target);
+  for (var name2 in all)
+    __defProp(target, name2, {get: all[name2], enumerable: true});
+};
+var __exportStar = (target, module, desc) => {
+  __markAsModule(target);
+  if (module && typeof module === "object" || typeof module === "function") {
+    for (let key of __getOwnPropNames(module))
+      if (!__hasOwnProp.call(target, key) && key !== "default")
+        __defProp(target, key, {get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable});
+  }
+  return target;
+};
+var __toModule = (module) => {
+  if (module && module.__esModule)
+    return module;
+  return __exportStar(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", {value: module, enumerable: true}), module);
+};
+
+// src/shared/languages/ocl.ts
+import {LezerLanguage} from "@codemirror/language";
+import {styleTags, tags as t} from "@codemirror/highlight";
+var require_ocl = __commonJS((exports) => {
+  __export(exports, {
+    default: () => ocl_default
+  });
+  var ocl_default = LezerLanguage.define({
+    parser: parser.configure({
+      props: [styleTags({
+        self: t.self,
+        "if then else endif": t.controlKeyword,
+        "package endpackage": t.keyword,
+        "true false null invalid let in context inv pre post init derive": t.keyword,
+        "and or implies xor": t.keyword,
+        "Set Bag Sequence Collection OrderedSet Tuple": t.typeName,
+        "OclAny OclInvalid OclMessage OclVoid": t.typeName,
+        "Boolean Integer Real String UnlimitedNatural": t.typeName,
+        PreMarker: t.special(t.keyword),
+        Type: t.typeName,
+        SimpleName: t.keyword,
+        BlockComment: t.blockComment,
+        StringLiteral: t.string,
+        NumericLiteral: t.number,
+        LineComment: t.lineComment,
+        EnumLiteral: t.literal,
+        MethodName: t.function(t.variableName),
+        PropertyName: t.propertyName,
+        Namespace: t.namespace,
+        VariableName: t.definition(t.variableName),
+        "( )": t.paren,
+        "^ ^^": t.operatorKeyword
+      })]
+    }),
+    languageData: {}
+  });
+});
 
 // src/cli/ublatt.ts
 import "source-map-support/register.js";
@@ -19,9 +90,7 @@ import {
 
 // src/cli/metadata.ts
 import yaml from "yaml";
-import {
-  readFile
-} from "fs/promises";
+import {readFile} from "fs/promises";
 function parseMetadata(input) {
   return yaml.parse(input);
 }
@@ -102,6 +171,115 @@ import {
 import {
   parse as parse2
 } from "path";
+
+// src/shared/codemirror/highlight.ts
+import {HighlightStyle, tags} from "@codemirror/highlight";
+var highlight_default = HighlightStyle.define({
+  tag: tags.link,
+  textDecoration: "underline"
+}, {
+  tag: tags.heading,
+  textDecoration: "underline",
+  fontWeight: "bold"
+}, {
+  tag: tags.function(tags.variableName),
+  color: "#795e26"
+}, {
+  tag: tags.emphasis,
+  fontStyle: "italic"
+}, {
+  tag: tags.strong,
+  fontWeight: "bold"
+}, {
+  tag: tags.keyword,
+  color: "#00f"
+}, {
+  tag: tags.controlKeyword,
+  color: "#af00db"
+}, {
+  tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName],
+  color: "#219"
+}, {
+  tag: [tags.literal, tags.inserted],
+  color: "#098658"
+}, {
+  tag: [tags.string, tags.deleted],
+  color: "#a31515"
+}, {
+  tag: [tags.regexp, tags.escape, tags.special(tags.string)],
+  color: "#e40"
+}, {
+  tag: tags.definition(tags.variableName),
+  color: "#0070c1"
+}, {
+  tag: tags.local(tags.variableName),
+  color: "#30a"
+}, {
+  tag: [tags.typeName, tags.namespace],
+  color: "#267f99"
+}, {
+  tag: tags.className,
+  color: "#267f99"
+}, {
+  tag: [tags.special(tags.variableName), tags.macroName, tags.local(tags.variableName)],
+  color: "#256"
+}, {
+  tag: tags.propertyName,
+  color: "#001080"
+}, {
+  tag: tags.definition(tags.propertyName),
+  color: "#001080"
+}, {
+  tag: tags.comment,
+  color: "#008000"
+}, {
+  tag: tags.meta,
+  color: "#7a757a"
+}, {
+  tag: tags.invalid,
+  color: "#f00"
+});
+
+// src/cli/markdown.ts
+import {highlightTree} from "@codemirror/highlight";
+
+// src/shared/languages/ocl.grammar
+import {Parser} from "lezer";
+var spec_simpleName = {__proto__: null, package: 8, context: 14, Set: 23, Bag: 25, Sequence: 27, Collection: 29, OrderedSet: 31, Tuple: 33, pre: 48, and: 56, or: 58, xor: 60, implies: 62, self: 66, true: 92, false: 94, null: 98, invalid: 102, let: 106, in: 108, if: 118, then: 120, else: 122, endif: 124, OclAny: 127, OclInvalid: 129, OclMessage: 131, OclVoid: 133, init: 134, derive: 136, inv: 138, static: 140, def: 142, post: 146, body: 148, endpackage: 150};
+var parser = Parser.deserialize({
+  version: 13,
+  states: ":jQ]QPOOOOQO'#ES'#ESOOQO'#Dz'#DzQ`QPOOQOQPOOOeQPO'#ExOjQPO'#EOOOQO-E7x-E7xOoQPO,5;dOOQO'#EQ'#EQO!QQPO,5;dO!`QPO,5;hOOQO'#Ca'#CaO!kQPO,5:jOjQPO1G1OO!vQPO1G0ZO!{QPO'#EyO#TQPO'#EyO#]QPO'#EyOOQO1G1O1G1OO#bQPO'#E}OOQO1G1S1G1SO#gQPO,5:lO#lQPO1G0UOOQO1G0U1G0UO#tQPO7+&jO$SQPO'#CbOOQO1G0W1G0WO$hQPO1G1RO$mQPO7+%uO$rQPO,5;eO%|QPO,5;eO&RQPO,5;eO&WQPO,5;eO&]QPO,5;eO&eQPO,5;iOOQO'#Cb'#CbOOQO7+%p7+%pOOQO<<JU<<JUO&jQPO7+&mO'gQPO<<IaO)UQPO'#CaO*bQPO'#DPO+zQPO1G1POOQO'#Cq'#CqOOQO'#Cp'#CpO,XQPO'#DROOQO'#DX'#DXOOQO'#DW'#DWOOQO'#DO'#DOOOQO'#Co'#CoOOQO'#EX'#EXOOQO'#C|'#C|O,^QPO'#DVOOQO'#DZ'#DZOOQO'#D^'#D^OOQO'#D`'#D`O,cQPO'#DbO$rQPO'#DhO$rQPO1G1PO,hQPO'#CaO-VQPO'#E{O-[QPO'#CmOOQO'#Ez'#EzO.VQPO'#EzO.[QPO1G1PO&RQPO1G1PO.pQPO1G1PO$rQPO1G1TOOQO'#Cn'#CnO.uQPO'#E]O/TQPO<<JXO/YQPO<<JXO/_QPO'#CaO0iQPO'#EVO0nQPO'#EWOOQO'#EV'#EVO0sQPO'#E[OOQO'#Ev'#EvO0xQPOAN>{O1QQPO,5:lO1VQPO,59aO$rQPO,59cO$rQPO,59cO$rQPO,59cO$rQPO,59cO1[QPO,5:PO$rQPO,59cO$rQPO,59cO$rQPO,59cOOQO7+&k7+&kO$rQPO,59mO,cQPO,59qO1aQPO,59|O2pQPO,5:SO2wQPO7+&kO3UQPO,5:lO$rQPO,59XO3ZQPO,59XO$rQPO,5;fO4TQPO7+&kO&RQPO7+&kO4iQPO7+&oO,cQPO,5:wO5PQPOAN?sO5mQPOAN?sO5rQPO,5:lO5wQPO,5:rO,cQPO,5:vO6OQPO'#EwOOQOG24gG24gO6TQPO'#CbOOQO1G/V1G/VO8pQPO'#CsO;`QPO1G.xOOQO1G.{1G.{O=wQPO1G.}O>RQPO1G.}O@iQPO1G.}O@yQPO1G.}OAZQPO1G/kOCuQPO1G.}OC|QPO1G.}OEXQPO1G.}OFqQPO'#DTOOQO'#DT'#DTOGOQPO'#DSOGWQPO1G/XOG]QPO1G/]O$rQPO1G/hO$rQPO1G/nOOQO<<JV<<JVOGbQPO'#CbOGjQPO1G.sOHaQPO1G.sOIXQPO1G1QOIoQPO<<JVOOQO<<JZ<<JZOOQO1G0c1G0cOOQOG25_G25_OJTQPOG25_OJqQPO'#CbOOQO1G0]1G0]OK{QPO1G0^OLQQPO1G0bO$rQPO,5;cOLVQPO,59_OMcQPO7+$dOMmQPO7+%VO$rQPO,59pO$rQPO,59nOOQO7+$s7+$sOOQO7+$w7+$wOMtQPO7+%SO! ^QPO7+%YO$rQPO7+$_OOQOAN?qAN?qOOQOLD*yLD*yOOQO7+%x7+%xOOQO7+%|7+%|O! eQPO1G0}O! xQPO1G.yO!$eQPO'#CaO!$uQPO'#EdOOQO<<HO<<HOO!%PQPO<<HOO!%UQPO<<HOO!%^QPO'#DgO!%hQPO'#DgO!%sQPO'#DfO!%{QPO<<HqO!&QQPO1G/[OOQO1G/Y1G/YO$rQPO<<HtO!&[QPO<<GyOOQO7+&i7+&iO$rQPO,5;OOOQOAN=jAN=jO!'RQPOAN=jO,cQPOAN=jO!'YQPO,5:ROMmQPO,5:QOOQOAN>]AN>]O!'dQPOAN>`OOQO1G0j1G0jOOQOG23UG23UO!'kQPOG23UO!'pQPOG23UOOQO1G/m1G/mOOQO1G/l1G/lOOQOG23zG23zOOQOLD(pLD(pO!'uQPOLD(pOOQO!$'L[!$'L[O!'|QPO!$'L[OOQO!)9Av!)9Av",
+  stateData: "!(R~O!qOSPOSQOS~OSUOVTO~O!sWO~O!s[O~O!x^O!gTX!hTX!iTX!uTX~O!g`O!hbO!iaO!u_O~OhdO!kdO!ldO~OVTO!mhO!ufO~O!sjO~O!soO!xnO~O!sqO!xpO~O!irO~O!ssO~O!stO~OVTO!muO~O!g`O!hbO!iaO!ufO~O!gUX!hUX!iUX!uUX!xWX!|!jX~O!|wO~O!xxO~OZ!TO[!TO]!TO^!TO_!TO`!VOq!UO|!QO!O!WO!P!WO!R!XO!T!YO!V!ZO!]![O!syO#X!PO#e!PO#f!PO~O!x!]O~O!s!^O~O!x!dO~O!s!eO!x!dO~O!x!fO~O!s!gO!}!iO~OZ!TO[!TO]!TO^!TO_!TO`!oO!a!pO!b!pO!c!pO!d!pO!s!kO~O!e!yP!f!yP~P&rOlpXmpXnpXopX!uTX#QpX#RpX#SpX#XpX#YpX#ZpX#[pX#]pX#^pX#_pX#`pX#apX#gpX#hpX#UpX!}pX~OVpX!gpX!hpX!ipX!opX!^pXhpX!kpX!lpX#cpX#dpX!mpX!WpX!_pX!epX!fpX!`pX#VpX~P'qO!u!rO~Ol!yOm!zOn!zOo!{O!g`O!hbO!iaO#Q!wO#R!sO#S!sO#X!tO#Y!tO#Z!uO#[!uO#]!vO#^!vO#_!vO#`!vO#a!wO#g!xO#h!xO~OV#mi!o#mi!m#mi~P*gO#b!}O~O#b#OO~O!s!gO~OVbX!gbX!hbX!ibX!obX!uTX!xbX#QbX!mbX~O!u#SO~O!x#UO#Q#TOVaX!gaX!haX!iaX!oaX!}aX#UaX!WaX#daX!maX#VaX~O#Q#VO~O!g`O!hbO!iaOV#mi!o#mi!m#mi~O!x#XO~O#U#ZO!}#PX!W#PX#d#PX~O!x#[O~O!}#]O~O!eYX!fYX!uTXVYX!gYX!hYX!iYX!oYX#QYX!}YX#UYXhYX!kYX!lYX!WYX#dYX!mYX#VYX~O!u#^O~O!|#_O~O!|#`O~O!e#aO!f#aO~O!s#cO~O!s#eO~O!s#lO~O!W#uO~Ol!yOm!zOn!zOo!{O#Q!wO#R!sO#S!sO#X!tO#Y!tO#Z!uO#[!uO#]!vO#^!vO#_!vO#`!vO#a!wO#g!xO#h!xO~O!^#vO~P1fOV#mq!o#mq!m#mq~P*gO!s#xO~OV!yP!g!yP!h!yP!i!yP!o!yP#Q!yP!}!yP#U!yP!W!yP#d!yP!m!yP#V!yP~P&rO!g`O!hbO!iaOV#mq!o#mq!m#mq~OhdO!kdO!ldOV#qq!o#qq!m#qq~P1fOh!yPh#o!R!k!yP!k#o!R!l!yP!l#o!R#Q!yP#Q#o!R~P&rO!x$QO~O!s$RO~O!}!yP~P&rO!x$VO~OVtXltXmtXntXotX!gtX!htX!itX!otX!uUX#QtX#RtX#StX#XtX#YtX#ZtX#[tX#]tX#^tX#_tX#`tX#atX#gtX#htX!^tXhtX!ktX!ltX#UtX#ctX#dtX!mtX!}tX!WtX!_tX!etX!ftX!`tX#VtX~O#T$WOVjXljXmjXnjXojX!gjX!hjX!ijX!ojX!|gX#QjX#RjX#SjX#XjX#YjX#ZjX#[jX#]jX#^jX#_jX#`jX#ajX#gjX#hjX!^jXhjX!kjX!ljX#UjX#cjX#djX!mjX!}jX!WjX!_jX!ejX!fjX!`jX#VjX~O!|$XO~O#R!sO#S!sOVkilkimkinkioki!gki!hki!iki!oki#Qki#Zki#[ki#]ki#^ki#_ki#`ki#aki#gki#hki!^kihki!kki!lki#Uki#cki#dki!mki!}ki!Wki!_ki!eki!fki!`ki#Vki~O#Xki#Yki~P;eO#X!tO#Y!tO~P;eO#R!sO#S!sO#X!tO#Y!tO#Z!uO#[!uOVkilkimkinkioki!gki!hki!iki!oki#Qki#aki#gki#hki!^kihki!kki!lki#Uki#cki#dki!mki!}ki!Wki!_ki!eki!fki!`ki#Vki~O#]ki#^ki#_ki#`ki~P>]O#]!vO#^!vO#_!vO#`!vO~P>]O!|$YO~O#Q!wO#R!sO#S!sO#X!tO#Y!tO#Z!uO#[!uO#]!vO#^!vO#_!vO#`!vO#a!wOVkimkinkioki!gki!hki!iki!oki#gki#hki!^kihki!kki!lki#Uki#cki#dki!mki!}ki!Wki!_ki!eki!fki!`ki#Vki~Olki~PA`Ol!yO~PA`Ol!yOm!zOn!zOo!{O#Q!wO#R!sO#S!sO#X!tO#Y!tO#Z!uO#[!uO#]!vO#^!vO#_!vO#`!vO#a!wO~OVki!gki!hki!iki!oki#gki#hki!^kihki!kki!lki#Uki#cki#dki!mki!}ki!Wki!_ki!eki!fki!`ki#Vki~PDTO#c$ZO#UwX#dwX~P1fO#U$[O#dvX~O#d$]O~O#d$^O~O!uUX!|!jX~OVai!gai!hai!iai!oai!}ai#Uai!Wai#dai!mai#Vai~P1fO#Q$aOVai!gai!hai!iai!oai!}ai#Uai!Wai#dai!mai#Vai~OV#ni!g#ni!h#ni!i#ni!o#ni!m#ni~P1fO!g`O!hbO!iaOV#my!o#my!m#my~Oh!yPh#o!Z!k!yP!k#o!Z!l!yP!l#o!Z#Q!yP#Q#o!Z~P&rO!eXX!fXX!uUXVXX!gXX!hXX!iXX!oXX#QXX!}XX#UXXhXX!kXX!lXX!WXX#dXX!mXX#VXX~O!}$dO~O!}$eO~Oh$gO~OZ!TO[!TO]!TO^!TO_!TO`!VOq!UO|!QO!O!WO!P!WO!R!XO!T!YO!V!ZO!]![O#X!PO#e!PO#f!PO~O!s$hO!}$jO~PL[O#i$nO~P$rOV!Uq!g!Uq!h!Uq!i!Uq!o!Uq#g!Uq#h!Uq!^!Uqh!Uq!k!Uq!l!Uq#U!Uq#c!Uq#d!Uq!m!Uq!}!Uq!W!Uq!_!Uq!e!Uq!f!Uq!`!Uq#V!Uq~PDTO!_$sO~P1fO!e#aO!f#aOV#ki!o#ki!m#ki~P1fOVjiljimjinjioji!gji!hji!iji!oji!|gi#Qji#Rji#Sji#Xji#Yji#Zji#[ji#]ji#^ji#_ji#`ji#aji#gji#hji!^jihji!kji!lji#Uji#cji#dji!mji!}ji!Wji!_ji!eji!fji!`ji#Vji~O!xbX#QbX#UbX#VbX~P'qO#U$vO!}#WX~P1fO!}$wO~O#U$yO#V$xO~O!}!ZX#U!ZX~P1fO!x$zO!}!ZX#U!ZX~O#U${O!}!YX~O!}$|O~O#Uxi#dxi~P1fOVay!gay!hay!iay!oay!}ay#Uay!Way#day!may#Vay~P1fO!}%PO~P$rO!}!yP#U!yP~P&rO!`%UO~P1fO!}%VO~O#V%WO~O!}%XO~P$rO!}%ZO~O",
+  goto: "/p#rPPPPP#s$nP$u$x${PPPPPP%T%g%s'^'{(j)XP(j)['^PPPP'^P'^)_)|)_*P*V*Z)_)_*_P*_PP*_P*_P'^PP'^*|+S'^PPPPPPPPPPPPP+WPPP+[PPP+fP+iP,n,tP,z${-^PP${.TPPPPPP.dPPPPPPPPPPPPPPPPP${.p,t.v/X/b,t/j!qXTU^npx![!]!d!f!t!u!v!w!y!z!{!}#T#U#V#X#[#_#u#v$Q$V$X$Y$Z$[$a$s$v$x$z${%WZk_f!r#S#^Rm_R$S#^]!nx#U#[#_$Q$zU!ap!d#XY!hw!Z#O#Z#`Q$l$XR%R$ye!`pw!Z!d#O#X#Z#`$X$yQ{nQ#Q![Q#R!]Q#Y!fQ#h!tQ#i!uQ#j!vQ#k!wQ#m!yQ#n!zQ#o!{S#p!}$[Q#y#TQ#{#VQ$_#uQ$`#vQ$f$VW$i$X$v$x%WS$m$Y${Q$q$ZQ$t$aR$}$s!X!Sn![!]!f!t!u!v!w!y!z!{!}#T#V#u#v$V$X$Y$Z$[$a$s$v$x${%W!X}n![!]!f!t!u!v!w!y!z!{!}#T#V#u#v$V$X$Y$Z$[$a$s$v$x${%W!X|n![!]!f!t!u!v!w!y!z!{!}#T#V#u#v$V$X$Y$Z$[$a$s$v$x${%WR#f!sR#g!s!X!Rn![!]!f!t!u!v!w!y!z!{!}#T#V#u#v$V$X$Y$Z$[$a$s$v$x${%WR#d!rQ#s!}R$r$[T#r!}$[T#q!}$[!X!Qn![!]!f!t!u!v!w!y!z!{!}#T#V#u#v$V$X$Y$Z$[$a$s$v$x${%WQ$p$YR%T${T$o$Y${Tl_#SQROSVRgRg]RSOQYTQ]UQi^!Wzn![!]!f!t!u!v!w!y!z!{!}#T#V#u#v$V$X$Y$Z$[$a$s$v$x${%WU!_p!d#X]!lx#U#[#_$Q$zXQOR]gXPOR]gQ!qxQ#z#UQ$P#[Q$T#_Q$c$QR%S$z!W!On![!]!f!t!u!v!w!y!z!{!}#T#V#u#v$V$X$Y$Z$[$a$s$v$x${%W]!mx#U#[#_$Q$zQ!jwQ#P!ZQ#t#OQ$O#ZR$U#`Q$k$XQ%O$vQ%Q$xR%Y%WQ#b!qR$u$fQcYQviS!|{!cS#w#R#WR$b#|Q!cpQ#W!dR#|#XQZTV!bp!d#XQeZR#}#Y",
+  nodeNames: "\u26A0 LineComment BlockComment ExpressionInOcl package Namespace Namespace context PropertyName Type Type Set Bag Sequence Collection OrderedSet Tuple VariableDeclaration VariableName OclExpression CallExp FeatureCallExp OperationCallExp MethodName pre PropertyCallExp PropertyName BinaryExp and or xor implies VariableExp self LiteralExp EnumLiteralExp EnumLiteral CollectionLiteralExp CollectionLiteralParts CollectionLiteralPart CollectionRange TupleLiteralExp PrimitiveLiteralExp NumericLiteral StringLiteral BooleanLiteralExp true false NullLiteralExp null InvalidLiteralExp invalid LetExp let in OclMessageExp OclMessageArguments OclMessageArg IfExp if then else endif OclAny OclInvalid OclMessage OclVoid init derive inv static def MethodName post body endpackage",
+  maxTerm: 125,
+  skippedNodes: [0, 1, 2],
+  repeatNodeCount: 1,
+  tokenData: "-R~RsX^#`pq#`tu$Twx$ixy%ayz%fz{%k{|%p|}%u}!O%z!O!P&g!P!Q&t!Q!R't!R![*a![!]+T!^!_+b!_!`+w!`!a+|!a!b,Z!b!c,`!c!}$T#Q#R,e#R#S$T#T#o$T#o#p,r#p#q,w#q#r,|#y#z#`$f$g#`#BY#BZ#`$IS$I_#`$I|$JO#`$JT$JU#`$KV$KW#`&FU&FV#`~#eY!q~X^#`pq#`#y#z#`$f$g#`#BY#BZ#`$IS$I_#`$I|$JO#`$JT$JU#`$KV$KW#`&FU&FV#`~$YT!s~tu$T!Q![$T!c!}$T#R#S$T#T#o$T~$lUOY$iZw$iwx%Ox#O$i#O#P%T#P~$i~%TO|~~%WROY$iYZ$iZ~$i~%fO!|~~%kO!}~~%pO#X~~%uO#Z~~%zO#U~~&PQ#[~}!O&V!`!a&b~&[QP~OY&VZ~&V~&gO#R~~&lP#S~!O!P&o~&tO#c~~&yP#Y~z{&|~'PSOz&|z{']{!P&|!Q~&|~'`TOz&|z{']{!P&|!P!Q'o!Q~&|~'tOQ~~'yR#e~!O!P(S!g!h)g#X#Y)g~(VP!Q![(Y~(_R#f~!Q![(Y!g!h(h#X#Y(h~(kS{|(w}!O(w!Q!R)Q!R![)V~(zQ!Q!R)Q!R![)V~)VO#f~~)[P#f~!Q![)_~)dP#f~!Q![)_~)jS{|)v}!O)v!Q!R)Q!R![*P~)yQ!Q!R)Q!R![*P~*UP#f~!Q![*X~*^P#f~!Q![*X~*fS#e~!O!P(S!Q![*r!g!h)g#X#Y)g~*wS#e~!O!P(S!Q![*r!g!h)g#X#Y)g~+YP!x~![!]+]~+bO!u~~+gQ#]~!_!`+m!`!a+r~+rO#_~~+wO#a~~+|O#Q~~,RP#^~!_!`,U~,ZO#`~~,`O#i~~,eO#T~~,jP#g~#Q#R,m~,rO#h~~,wO#b~~,|O#V~~-RO#d~",
+  tokenizers: [0],
+  topRules: {ExpressionInOcl: [0, 3]},
+  specialized: [{term: 81, get: (value) => spec_simpleName[value] || -1}],
+  tokenPrec: 0
+});
+
+// src/shared/codemirror/languages.ts
+var languages = {
+  javascript: () => import("@codemirror/lang-javascript").then((x) => x.javascriptLanguage),
+  typescript: () => import("@codemirror/lang-javascript").then((x) => x.typescriptLanguage),
+  jsx: () => import("@codemirror/lang-javascript").then((x) => x.jsxLanguage),
+  tsx: () => import("@codemirror/lang-javascript").then((x) => x.tsxLanguage),
+  python: () => import("@codemirror/lang-python").then((x) => x.pythonLanguage),
+  cpp: () => import("@codemirror/lang-cpp").then((x) => x.cppLanguage),
+  css: () => import("@codemirror/lang-css").then((x) => x.cssLanguage),
+  markdown: () => import("@codemirror/lang-markdown").then((x) => x.markdownLanguage),
+  ocl: () => Promise.resolve().then(() => __toModule(require_ocl())).then((x) => x.default)
+};
+languages.py = languages.python;
+languages.ts = languages.typescript;
+languages.js = languages.javascript;
+var languages_default = languages;
+
+// src/cli/markdown.ts
 var Markdown = class {
   constructor(options) {
     this.md = markdownit().use(container, "classes", {
@@ -143,16 +321,59 @@ var Markdown = class {
       } else {
         console.warn(src + " does not exist");
       }
-      return slf.renderToken(tokens, idx, opts);
+      return `<figure>${slf.renderToken(tokens, idx, opts)}<figcaption>${slf.renderInline(token?.children || [], opts, env)}</figcaption></figure>`;
     };
     this.md.renderer.rules.fence = function(tokens, idx, options2, env, slf) {
       const token = tokens[idx];
+      let str = token.content;
+      if (str.slice(-1) == "\n")
+        str = str.slice(0, -1);
+      const m = token.info.match(/\S+/);
       token.attrJoin("class", token.info);
-      return "<pre" + slf.renderAttrs(token) + "><code>" + token.content + "</code></pre>";
+      let res = '<div class="line">';
+      const newline = "</div><div class='line'>";
+      if (m && m[0] && env.highlighters[m[0]]) {
+        const lang = env.highlighters[m[0]];
+        let i = 0;
+        highlightTree(lang.parseString(str), highlight_default.match, (from, to, classes) => {
+          if (i < from)
+            res += str.slice(i, from).replaceAll("\n", newline);
+          res += `<span class="${classes}">`;
+          res += str.slice(from, to).replaceAll("\n", `</span>${newline}<span class=${classes}>`);
+          res += "</span>";
+          i = to;
+        });
+        res += str.slice(i).replaceAll("\n", newline);
+      } else {
+        res += str.replaceAll("\n", newline);
+      }
+      res += "</div>";
+      return "<pre" + slf.renderAttrs(token) + "><code>" + res + "</code></pre>";
     };
   }
-  render(input) {
-    return this.md.render(input);
+  async render(input) {
+    const env = {
+      highlighters: {}
+    };
+    const parse5 = this.md.parse(input, env);
+    const extractLanguages = async (tkn) => {
+      if (tkn.type == "fence") {
+        const m = tkn.info.match(/\S+/);
+        if (m && m[0]) {
+          if (languages_default[m[0]])
+            env.highlighters[m[0]] = await languages_default[m[0]]();
+        }
+        return;
+      } else {
+        if (tkn.children) {
+          await Promise.all(tkn.children.map(extractLanguages));
+        }
+        return;
+      }
+    };
+    await Promise.all(parse5.map(extractLanguages));
+    const res = this.md.renderer.render(parse5, this.md.options, env);
+    return res;
   }
 };
 var markdown_default = Markdown;
@@ -171,7 +392,7 @@ var files = [
   "dist/*"
 ];
 var main = "dist/ublatt.js";
-var version = "1.4.0";
+var version = "1.4.1";
 var description = "An interactive exercise sheet generator";
 var homepage = "https://github.com/martinring/ublatt";
 var license = "MIT";
@@ -195,10 +416,23 @@ var dependencies = {
   "@codemirror/gutter": "^0.17.0",
   "@codemirror/highlight": "^0.17.0",
   "@codemirror/history": "^0.17.0",
+  "@codemirror/lang-cpp": "^0.17.0",
+  "@codemirror/lang-css": "^0.17.0",
+  "@codemirror/lang-html": "^0.17.0",
+  "@codemirror/lang-java": "^0.17.0",
+  "@codemirror/lang-javascript": "^0.17.0",
+  "@codemirror/lang-json": "^0.17.0",
+  "@codemirror/lang-markdown": "^0.17.0",
+  "@codemirror/lang-python": "^0.17.0",
+  "@codemirror/lang-rust": "^0.17.0",
+  "@codemirror/lang-sql": "^0.17.0",
+  "@codemirror/lang-xml": "^0.17.0",
   "@codemirror/language": "^0.17.0",
   "@codemirror/legacy-modes": "^0.17.0",
   "@codemirror/state": "^0.17.0",
   "@codemirror/view": "^0.17.0",
+  "@hpcc-js/wasm": "1.2.0",
+  "diagram-js": "7.2.0",
   esbuild: "^0.8.31",
   katex: "^0.12.0",
   "lezer-generator": "^0.13.2",
@@ -211,9 +445,10 @@ var dependencies = {
   mermaid: "8.9.0",
   prismjs: "1.21.0",
   punycode: "^2.1.1",
+  "source-map-support": "^0.5.19",
+  "style-mod": "^3.2.1",
   yaml: "^1.10.0",
-  yargs: "^16.2.0",
-  "source-map-support": "^0.5.19"
+  yargs: "^16.2.0"
 };
 var devDependencies = {
   "@types/babel__core": "^7.1.12",
@@ -266,7 +501,7 @@ function header_default(props) {
 
 // src/shared/templates/submit.ts
 function submit_default(props) {
-  return (\u00B5) => \u00B5("div", {class: "submit"}, \u00B5("div", {}, \u00B5("h1", {}, "Abgabe"), \u00B5("p", {}, "Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure L\xF6sung. Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail."), \u00B5("div", {class: "buttons", id: props.buttons})), \u00B5("div", {}, \u00B5("h1", {}, "Autoren"), \u00B5("div", {class: "authors"})));
+  return (\u00B5) => \u00B5("div", {class: "submit"}, \u00B5("h1", {}, "Abgabe"), \u00B5("div", {class: "row"}, \u00B5("div", {}, \u00B5("p", {}, "Bitte gebt alle Autoren mit Matrikelnummer und Emailaddresse an und speichert dann eure L\xF6sung. Die gespeicherte JSON Datei sendet ihr dann an beide Tutoren per E-Mail.")), \u00B5("div", {}, \u00B5("div", {class: "authors"}))), \u00B5("div", {class: "buttons", id: props.buttons}));
 }
 
 // src/cli/render.ts
@@ -316,8 +551,8 @@ ${children.join("")}
   empty() {
     return "";
   },
-  when(p, t) {
-    return p ? t() : "";
+  when(p, t2) {
+    return p ? t2() : "";
   }
 });
 function render(template) {
@@ -385,7 +620,7 @@ async function build(options) {
     },
     standalone: options.standalone
   });
-  const body = md.render(markdown);
+  const body = await md.render(markdown);
   const initArgs = [];
   if (options.submission) {
     const sub = options.submission;
@@ -436,9 +671,9 @@ async function build(options) {
         setup(build2) {
           build2.onLoad({filter: /\.grammar$/}, async (args) => {
             const source = await readFile2(args.path, {encoding: "utf-8"});
-            const {parser} = buildParserFile(source, {});
+            const {parser: parser2} = buildParserFile(source, {});
             return {
-              contents: parser,
+              contents: parser2,
               loader: "js"
             };
           });
@@ -451,6 +686,8 @@ async function build(options) {
   if (bundle.outputFiles) {
     script = bundle.outputFiles[0].text.replaceAll("</script>", "<\\/script>");
     style = bundle.outputFiles[1].text;
+  } else {
+    return;
   }
   meta["$dir"] = "dist";
   const footer = render((\u00B5) => \u00B5.when(!options.submission, () => submit_default({buttons: "submit-buttons"})(\u00B5)));

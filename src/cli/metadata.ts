@@ -1,5 +1,5 @@
 import yaml from 'yaml';
-import * as fs from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { Author } from '../shared/Types';
 
 export type Metadata = {
@@ -12,7 +12,7 @@ export type Metadata = {
 
 export function loadMetadata(path: string | string[]): Promise<Metadata> {
   if (typeof path == "string") {
-    return fs.readFile(path).then(x => x.toString('utf-8')).then(yaml.parseDocument)
+    return readFile(path).then(x => x.toString('utf-8')).then(yaml.parseDocument)
   } else {
     return path.map(loadMetadata).reduce(async (a,b) => {
       const a_ = await a
